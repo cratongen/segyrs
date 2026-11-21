@@ -27,7 +27,6 @@ jobs:
             .cargo-home/git
             target
           key: cargo-${{ runner.os }}-${{ hashFiles('Cargo.lock', 'mise.toml') }}
-          restore-keys: cargo-${{ runner.os }}-
       # Installs every tool pinned in mise.toml, including each pinned Python.
       - uses: jdx/mise-action@236a21c3b91f5db6d4e174b348674a0f0caac06d # v5.2.9
       - run: mise run lint
