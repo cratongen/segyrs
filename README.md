@@ -19,7 +19,7 @@ segyrs is alpha software, and 0.1.0 is its first public release: the API may sti
 pip install segyrs
 ```
 
-That installs one abi3 wheel for CPython 3.11 and newer on Linux (x86_64, aarch64, musl), macOS (Intel, Apple silicon) and Windows x64: reading, selection, headers, writing, in-place edits, the streaming operations, the notebook picture, `segyrs.open` on `s3://`, `gs://`, `az://` and `http(s)://` URLs, and `Volume.to_zarr`. Numpy is its only dependency. segyrs is the only package of the 0.1.0 release.
+On Linux x86_64 with glibc 2.28 or newer, that installs one abi3 wheel for CPython 3.11 and newer. 0.1.0 has no other wheel yet: on macOS, Windows, Linux aarch64 and musl Linux, pip builds segyrs from the sdist, which needs Rust 1.89 or newer ([rustup.rs](https://rustup.rs/)) and a C compiler (the Xcode Command Line Tools on macOS, the Visual Studio C++ Build Tools on Windows). Either way you get reading, selection, headers, writing, in-place edits, the streaming operations, the notebook picture, `segyrs.open` on `s3://`, `gs://`, `az://` and `http(s)://` URLs, and `Volume.to_zarr`. Numpy is its only dependency. segyrs is the only package of the 0.1.0 release.
 
 [Install and release](https://cratongen.github.io/segyrs/install-and-release/) has the platform table. The native viewer window (`segyrs.view`) is not part of the 0.1.0 release on PyPI; it will be published later. To build segyrs and the viewer from a checkout, use [mise](https://mise.jdx.dev/):
 

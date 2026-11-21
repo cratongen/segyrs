@@ -14,21 +14,36 @@ wheel; there are no extras. The native viewer window (`segyrs-view`,
 will be published later. This replaces the decision of 2026-11-20 (core by
 default, viewer, cloud and Zarr as extras in three projects).
 
-## Verdict: NOT READY
+## Verdict: Linux x86_64 and the sdist can go up by hand; the rest waits for Actions
 
-segyrs is **not ready to publish**, for three reasons:
+State on 2026-11-21:
 
-1. **The release workflow has never run.** Only the Linux x86_64 wheel was
-   built and tested. The other 5 wheels (Linux aarch64 and musl, macOS Intel
-   and Apple silicon, Windows) exist only once the owner pushes `main` and runs
-   the workflow with `publish: none`. The local `main` is 2 commits
-   ahead of `origin/main`.
-2. **Checks that were not rerun after the packaging change** are marked
-   "needs a rerun" in the table below. Rerun them on the release commit.
-3. **Owner steps before the repository goes public are open:** the PyPI
-   pending publisher and GitHub environments, the git-history decision, and
-   making the repository public (the README wordmark and every docs link point
-   at `https://cratongen.github.io/segyrs/`, which is live only after that).
+- **Done by the owner.** The git history is decided: a fresh history of one
+  root commit (`bc78304`), pushed to `main` on 2026-11-21. The repository
+  `cratongen/segyrs` is public. The PyPI pending publisher for `segyrs` exists
+  (values in the owner steps below). The GitHub environment `pypi` exists,
+  limited to tags `v*`, with a required reviewer. Pages is enabled.
+- **GitHub Actions are blocked by billing.** GitHub refuses to start any job
+  for the `cratongen` organization ("recent account payments have failed or
+  your spending limit needs to be increased"). No GitHub run of `ci`, `docs`
+  or `release` has ever executed a job. That is the only reason the
+  six-platform release matrix has not run, and why the docs site is not
+  deployed: Pages is enabled, but nothing has been published to
+  `https://cratongen.github.io/segyrs/`, so the README wordmark and the docs
+  links on the PyPI page do not resolve until the `docs` workflow runs. This
+  is a payment control; it is not worked around (no forks, mirrors or other
+  CI).
+- **What can go up today.** The sdist and the `manylinux_2_28_x86_64` wheel,
+  built and tested on a Linux x86_64 machine (the table
+  [Local release build](#local-release-build-2026-11-21) below), uploaded by the
+  owner with `mise run publish-local` and a PyPI API token. On every other
+  platform `pip install segyrs` then builds from the sdist (Rust 1.89 or
+  newer and a C compiler, see
+  [What 0.1.0 has on PyPI](install-and-release.md#what-010-has-on-pypi)).
+- **Not ready.** The macOS and Windows wheels cannot be built on a Linux
+  machine; the musllinux and aarch64 wheels build here but cannot run here
+  without a container, so they are untested and not uploaded. They wait for
+  the release workflow.
 
 ## minetypes adoption: gate lifted on 2026-11-21
 
@@ -80,7 +95,28 @@ layout, so its old result says nothing about this tree.
 | Docs site | `mise run docs-build` | `mkdocs build --strict` clean; theme checks 5 passed | `b0b04a7` | go |
 | Large local files | `systemd-run --user --scope -q -p MemoryMax=4G -p MemorySwapMax=0 mise exec -- env SEGYRS_DATA=../segyrs-data .venv/bin/python -m pytest -q python/tests/test_release_audit_data.py` (the `mise run test-data` suite under a memory limit) | needs a rerun | none | needs a rerun |
 | Audit blockers | the tests in the next table, by `pytest -k` and `cargo test` | the Python tests ran inside `mise run test` above; the separate run needs a rerun | none | needs a rerun |
-| Release workflow on all six platforms | GitHub, Actions, release, Run workflow, `publish: none` | **not run**: needs a push and the owner | none | **no-go** |
+| Release workflow on all six platforms | GitHub, Actions, release, Run workflow, `publish: none` | **not run**: GitHub refuses to start Actions jobs for `cratongen` (billing). No GitHub run has ever executed a job | none | **no-go** |
+
+`b0b04a7` is a commit of the history replaced on 2026-11-21 by the single
+root commit `bc78304`.
+
+### Local release build, 2026-11-21
+
+Built on Linux x86_64 because Actions are blocked. Docker was not usable
+(the user is not in the `docker` group, so the socket refuses the
+connection), so the manylinux and musllinux containers of the release
+workflow were not used; `mise run wheel-linux` cross-links with zig instead
+([Install and release](install-and-release.md#build-and-test-the-wheels-locally)).
+
+| Check | Command | Result | Upload |
+|-------|---------|--------|--------|
+| sdist | `mise run sdist` | built | yes |
+| manylinux_2_28 x86_64 wheel | `mise run wheel-linux` | built; auditwheel 6.8.2 `show`: consistent with `manylinux_2_28_x86_64` | yes |
+| that wheel on 3.11 and 3.15 | `mise run test-wheel-file 3.11 <wheel>`, then `3.15` | 575 passed, 106 skipped on each | yes |
+| musllinux_1_2 x86_64 wheel | `mise run wheel-linux x86_64-unknown-linux-musl musllinux_1_2` | built, **not tested**: needs a musl Python (an Alpine container) | no |
+| manylinux_2_28 aarch64 wheel | `mise run wheel-linux aarch64-unknown-linux-gnu manylinux_2_28` | built, auditwheel consistent with `manylinux_2_28_aarch64`, **not tested**: needs an arm64 Python | no |
+| macOS and Windows wheels | none | not built: they cannot be built legitimately on Linux | no |
+| Metadata and PyPI README | `mise run check-dist` | twine 6.2.0 `check --strict`: 4 of 4 PASSED (3 wheels, 1 sdist) | |
 
 ### Audit blockers and the test that closes each
 
@@ -161,9 +197,8 @@ layout, so its old result says nothing about this tree.
   traces where the independent decoder and `test-data/README.md` give 6.
 - A wheel built outside the manylinux container gets a local tag (`linux_x86_64`
   for the segyrs wheel of `mise run wheel` on this machine). The release
-  workflow builds in the manylinux_2_28 container.
-- The full segyio git history (about 1500 commits, LGPL sources and a 1.27 MB
-  data blob) is still in the repository. See the decisions below.
+  workflow builds in the manylinux_2_28 container; `mise run wheel-linux`
+  builds the upload tag locally with zig.
 - Crates are not crates.io-ready, by decision (see Later).
 
 ## Decisions for the owner
@@ -176,13 +211,13 @@ layout, so its old result says nothing about this tree.
   that platform (the publish checks would change), or to delay the release.
 - **When to publish the viewer.** `segyrs-view` gets its own PyPI project, a
   `view` extra and its own pending publisher in that later release.
-- **Git history before going public.** The repository began as a fork of
-  segyio: about 1500 commits, most by segyio authors, hold the deleted LGPL
-  C, C++ and Python sources and `python/tutorials/viking_small.segy`
-  (Viking Graben data, licence unclear), plus the removed `delay-scalar.sgy`.
-  Choose between a fresh history (one root commit of the current tree) and
-  keeping the history with a note in the README. Neither history is part of
-  the PyPI packages.
+- **Git history: decided.** A fresh history of one root commit
+  (`bc78304`), pushed on 2026-11-21. The segyio history is not in the
+  repository.
+- **Upload 0.1.0 by hand or wait for Actions.** A manual upload now gives
+  PyPI the sdist and the Linux x86_64 wheel only, and the README on the 0.1.0
+  page says so for good (PyPI keeps each version's description). Waiting
+  gives all six wheels in one release once billing is fixed.
 - **Licence expression of the wheels.** `pyproject.toml` states
   `Apache-2.0` (owner decision of 2026-11-21; it was `MIT OR Apache-2.0`). Each wheel also contains statically linked
   code under other permissive licences (BSD-2-Clause, BSD-3-Clause, ISC,
@@ -205,11 +240,17 @@ layout, so its old result says nothing about this tree.
   `ValueError` (a dim name segyrs does not know); `set_header(scalars=...)`
   leaving `scalco` alone; `SegyrsValueError` and `BudgetError` as new public
   names.
-- **When the repository becomes public.**
+- **The repository is public** (done, 2026-11-21).
 
 ## Owner steps to publish
 
-Do these in order, by hand. Nothing here was done by the release check.
+Steps 2, 3, 4 and 6 and the first half of step 7 are done (2026-11-21).
+While Actions are blocked by billing, step 5, the docs run of step 7 and
+step 9 cannot run; the manual route is
+[Publish from a local build](install-and-release.md#publish-from-a-local-build)
+with `mise run publish-local`, after step 8. A project created by that upload
+may not take over the pending publisher: then add the same trusted publisher
+under the project's Settings, Publishing, before the next tag.
 
 1. **Run every check in the go/no-go table on the release commit**, the ones
    marked "needs a rerun" included:
@@ -237,8 +278,8 @@ Do these in order, by hand. Nothing here was done by the release check.
 3. **GitHub environments.** In Settings, then Environments, create `pypi`
    with yourself as required reviewer and deployments limited to tags `v*`.
    Create `testpypi` the same way if you use it.
-4. **Push `main`** (`git push origin main`). The local branch is 2
-   commits ahead of `origin/main`.
+4. **Push `main`** (`git push origin main`). Done on 2026-11-21: a fresh
+   single-commit history.
 5. **Dry run.** Actions, then release, then Run workflow on `main` with
    `publish: none`. All six platforms must build and pass their tests. This is
    the first run of the segyrs wheel with the object-store stack outside Linux
@@ -246,7 +287,7 @@ Do these in order, by hand. Nothing here was done by the release check.
    with `publish: testpypi` and, in a fresh Python 3.11 venv, `pip install
    --index-url https://test.pypi.org/simple/ --extra-index-url
    https://pypi.org/simple/ segyrs` and run the README quick start.
-6. **Decide the git history** (decisions above) and apply it.
+6. **Decide the git history** (decisions above) and apply it. Done.
 7. **Make the repository public**, then Settings, Pages, Source: GitHub
    Actions, then Actions, docs, Run workflow on `main`. Check that
    `https://cratongen.github.io/segyrs/` serves the site and
