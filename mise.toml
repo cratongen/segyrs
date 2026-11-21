@@ -62,7 +62,7 @@ env = { CARGO_HOME = "{{config_root}}/.cargo-home" }
 
 [tasks.wheel]
 description = "The release abi3 wheel of segyrs for this platform into dist/ (the build the release workflow runs), with no build-machine paths"
-env = { CARGO_HOME = "{{config_root}}/.cargo-home", CARGO_TARGET_DIR = "{{config_root}}/target/wheel", RUSTFLAGS = "--remap-path-prefix={{config_root}}/.cargo-home=/cargo --remap-path-prefix={{config_root}}=/segyrs --remap-path-prefix={{env.HOME}}=/home" }
+env = { CARGO_HOME = "{{config_root}}/.cargo-home", CARGO_TARGET_DIR = "{{config_root}}/target/wheel", RUSTFLAGS = "--remap-path-prefix={{env.HOME}}=/home --remap-path-prefix={{config_root}}=/segyrs --remap-path-prefix={{config_root}}/.cargo-home=/cargo" }
 run = [
   "rm -f dist/segyrs-*.whl dist/segyrs_*.whl",
   "maturin build --release --locked --out dist --interpreter python3.11",

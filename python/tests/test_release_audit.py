@@ -406,7 +406,13 @@ def test_argument_and_budget_mistakes_are_not_file_system_errors(call, cls, text
 def test_an_installed_wheel_carries_no_build_machine_paths():
     native = next(p for p in Path(segyrs.__file__).parent.glob("_segyrs*") if p.suffix != ".pyi")
     data = native.read_bytes()
-    for leak in {str(Path.home()), str(Path(__file__).resolve().parents[2])}:
+    checkout = Path(__file__).resolve().parents[2]
+    leaks = {str(Path.home()), str(checkout)}
+    if checkout.is_relative_to(Path.home()):
+        # rustc applies the last matching --remap-path-prefix, so a home mapping
+        # listed after the checkout one leaves /home/<checkout path> behind.
+        leaks.add("/" + str(checkout.relative_to(Path.home())) + "/")
+    for leak in leaks:
         assert leak.encode() not in data, f"{native.name} holds {leak}"
 
 
