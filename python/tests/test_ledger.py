@@ -632,7 +632,7 @@ def test_x33_open_and_read_start_no_process(monkeypatch):
     def refuse(*args, **kwargs):
         raise AssertionError("segyrs started a process")
 
-    monkeypatch.setattr(os, "fork", refuse)
+    monkeypatch.setattr(os, "fork", refuse, raising=False)  # Windows has no os.fork
     monkeypatch.setattr(subprocess, "Popen", refuse)
     monkeypatch.setattr(multiprocessing.Process, "start", refuse)
     vol = segyrs.open(DATA / "small.sgy")

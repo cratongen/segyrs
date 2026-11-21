@@ -174,7 +174,10 @@ jobs:
           uv pip install --python "$py" --only-binary=:all: dist/segyrs-*.whl pytest
           "$py" -c "import segyrs, sys; print(sys.version, sys.platform, segyrs.__file__)"
           cd "$RUNNER_TEMP"
-          "$py" -m pytest -q -p no:cacheprovider --rootdir="$GITHUB_WORKSPACE" "$GITHUB_WORKSPACE/python/tests"
+          # Three packaging tests run cargo with --offline; these runners have cargo but no
+          # downloaded registry. They check the source tree, not the wheel, and ci.yml runs them.
+          "$py" -m pytest -q -p no:cacheprovider --rootdir="$GITHUB_WORKSPACE" "$GITHUB_WORKSPACE/python/tests" \
+            -k "not (test_the_segyrs_wheel_links_cloud_and_zarr_but_no_viewer_stack or test_each_crate_rust_version_covers_its_dependencies or test_each_wheel_carries_the_licence_of_every_crate_it_links)"
 
   # The upload jobs check that dist holds the sdist plus exactly one wheel per
   # built platform tag (S-45) before anything leaves the runner.

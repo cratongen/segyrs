@@ -160,11 +160,7 @@ enum StorageKind {
 
 impl Storage {
     fn open(path: &Path) -> Result<Self> {
-        let file = FsFile::open(path).map_err(Error::path("open", path))?;
-        let meta = file.metadata().map_err(Error::path("open", path))?;
-        if meta.is_dir() {
-            return Err(Error::path("open", path)(is_a_directory()));
-        }
+        let file = open_file(path)?;
         match map_file(&file) {
             Ok(map) => Ok(Self {
                 kind: StorageKind::Map(map),
@@ -201,7 +197,17 @@ impl Storage {
     }
 }
 
-pub(crate) fn is_a_directory() -> io::Error {
+/// Opens `path` for reading. A directory is refused as one on every system:
+/// Windows fails the open itself with "access is denied".
+pub(crate) fn open_file(path: &Path) -> Result<FsFile> {
+    let named = Error::path("open", path);
+    if path.is_dir() {
+        return Err(named(is_a_directory()));
+    }
+    FsFile::open(path).map_err(named)
+}
+
+fn is_a_directory() -> io::Error {
     #[cfg(unix)]
     return io::Error::from_raw_os_error(libc::EISDIR);
     #[cfg(not(unix))]

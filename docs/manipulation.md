@@ -23,12 +23,14 @@ the whole file, or the output of `filter`.
 
 ## The RAM budget
 
-`Budget::from_available()` is half of the RAM available at the call: Linux
-`MemAvailable`, lowered to the cgroup v2 headroom when a limit is set.
+`Budget::from_available()` is half of the RAM available at the call. On Linux
+that is `MemAvailable`, lowered to the cgroup v2 headroom when a limit is set.
+On Windows it is the smaller of the available physical memory and the
+remaining commit charge. On macOS it is the installed physical memory, since
+macOS reports no single figure for reclaimable memory.
 `Budget::fraction_of_available(f)` picks another fraction and `Budget::bytes(n)`
-sets a number. There is no compiled-in cap. On a system without
-`/proc/meminfo`, `from_available` returns an `Unsupported` error and you pass
-`Budget::bytes`.
+sets a number. There is no compiled-in cap. On any other system
+`from_available` returns an `Unsupported` error and you pass `Budget::bytes`.
 
 An operation that cannot fit raises `Error::Io` with kind `OutOfMemory` before
 it allocates. The message names the bytes needed and the budget.

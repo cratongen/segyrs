@@ -36,12 +36,8 @@ impl ReadAt for Whole<'_> {
 /// prove that every other program accepts it.
 pub fn validate(path: impl AsRef<Path>) -> Result<Layout> {
     let path = path.as_ref();
-    let file = FsFile::open(path).map_err(Error::path("open", path))?;
-    let meta = file.metadata().map_err(Error::path("open", path))?;
-    if meta.is_dir() {
-        return Err(Error::path("open", path)(crate::file::is_a_directory()));
-    }
-    let len = meta.len();
+    let file = crate::file::open_file(path)?;
+    let len = file.metadata().map_err(Error::path("open", path))?.len();
     let parsed = match structure(Whole(&file), len, &OpenOptions::default()) {
         Ok(parsed) => parsed,
         Err(Error::Io(err)) => return Err(Error::Io(err)),
