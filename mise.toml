@@ -4,9 +4,10 @@ actionlint = "1.7.12"
 maturin = "1.16.0"
 python = ["3.13.18", "3.11.18", "3.15.2"]
 ruff = "0.17.5"
-rust = { version = "1.97.1", components = "rustfmt,clippy" }
+rust = { version = "1.97.1", components = "rustfmt,clippy", targets = "aarch64-unknown-linux-gnu,x86_64-unknown-linux-musl" }
 shellcheck = "latest"
 uv = { version = "0.12.24", minimum_release_age = "0s", lazy = true }
+zig = "0.15.2"
 
 [tasks.build]
 description = "The segyrs extension and the segyrs-view extension into .venv (uv venv, maturin develop --release)"
@@ -68,6 +69,22 @@ run = [
   "maturin build --release --locked --out dist --interpreter python3.11",
 ]
 
+[tasks.wheel-linux]
+description = "A release Linux wheel with its upload tag into dist/, cross-linked by maturin's zig support (no container): target and tag default to manylinux_2_28 x86_64"
+env = { CARGO_HOME = "{{config_root}}/.cargo-home", CARGO_TARGET_DIR = "{{config_root}}/target/wheel-linux", RUSTFLAGS = "--remap-path-prefix={{env.HOME}}=/home --remap-path-prefix={{config_root}}=/segyrs --remap-path-prefix={{config_root}}/.cargo-home=/cargo" }
+run = "maturin build --release --locked --out dist --interpreter python3.11 --zig --target {{arg(name='target', default='x86_64-unknown-linux-gnu')}} --compatibility {{arg(name='compat', default='manylinux_2_28')}}"
+
+[tasks.test-wheel-file]
+description = "test-wheel on a given wheel file in dist/, with no rebuild: fresh venv on a pinned Python (default 3.11), the wheel alone, pytest"
+env = { UV_CACHE_DIR = "{{config_root}}/.uv-cache", UV_PYTHON_DOWNLOADS = "never" }
+run = [
+  "rm -rf .venv-wheel",
+  "uv venv --python {{arg(name='python', default='3.11')}} --python-preference only-system .venv-wheel",
+  "uv pip install --python .venv-wheel/bin/python {{arg(name='wheel')}} pytest",
+  ".venv-wheel/bin/python -c \"import segyrs, sys; assert 'site-packages' in segyrs.__file__; print(sys.version.split()[0], segyrs.__file__)\"",
+  "SEGYRS_CHECK_BUILD_PATHS=1 .venv-wheel/bin/python -m pytest -q -p no:cacheprovider python/tests",
+]
+
 [tasks.sdist]
 description = "The segyrs sdist into dist/, as the release workflow builds it"
 env = { CARGO_HOME = "{{config_root}}/.cargo-home" }
@@ -91,6 +108,16 @@ run = [
 description = "twine check --strict of every wheel and sdist in dist/ (metadata and the README as PyPI renders it); uploads nothing"
 env = { UV_CACHE_DIR = "{{config_root}}/.uv-cache", UV_PYTHON_DOWNLOADS = "never" }
 run = "uv tool run --python 3.13 twine==6.2.0 check --strict dist/*.whl dist/*.tar.gz"
+
+[tasks.publish-local]
+description = "Owner only, by hand: upload to PyPI the files built and tested on this machine (the sdist and the manylinux_2_28 x86_64 wheel in dist/) with uv publish; the token comes from UV_PUBLISH_TOKEN, and the task refuses to run without it"
+depends = ["check-dist"]
+env = { UV_CACHE_DIR = "{{config_root}}/.uv-cache", UV_PYTHON_DOWNLOADS = "never" }
+run = [
+  "test -n \"${UV_PUBLISH_TOKEN:-}\" || { echo 'publish-local: UV_PUBLISH_TOKEN is not set; export a PyPI API token first. Nothing was uploaded.' >&2; exit 1; }",
+  "ls -l dist/segyrs-*.tar.gz dist/segyrs-*-manylinux_2_28_x86_64.whl",
+  "uv publish --trusted-publishing never --check-url https://pypi.org/simple/ dist/segyrs-*.tar.gz dist/segyrs-*-manylinux_2_28_x86_64.whl",
+]
 
 [tasks.test-wheel]
 description = "Install dist/'s segyrs wheel in a fresh venv (default: the 3.11 floor) and run pytest on it alone, as a PyPI user gets it"

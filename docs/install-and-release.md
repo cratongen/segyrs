@@ -30,7 +30,9 @@ tests. On this machine (Linux x86_64, `mise run wheel`, 2026-11-21) the wheel is
 5.8 MB (5,794,779 bytes, `stat -c %s`).
 
 Each platform gets one wheel. The wheels are `abi3` (`cp311-abi3`), so the same
-file works on every CPython from 3.11 up.
+file works on every CPython from 3.11 up. The table is the release plan of the
+release workflow; see [What 0.1.0 has on PyPI](#what-010-has-on-pypi) for the
+wheels that exist today.
 
 | Platform | Wheel tag | Minimum OS |
 |----------|-----------|------------|
@@ -52,6 +54,33 @@ The Rust code is linked into the extension statically. The wheel holds one
 native file (`segyrs/_segyrs.abi3.so`, `.pyd` on Windows) and no sidecar
 library, so a PyInstaller bundle needs no hook (S-43). The release build fails
 if the wheel holds a `.libs` folder or a DLL.
+
+### What 0.1.0 has on PyPI
+
+GitHub Actions do not run for the `cratongen` organization (a billing block,
+see the [release checklist](release-checklist.md)), so the release workflow
+has never built the six wheels. 0.1.0 is uploaded by hand from a Linux x86_64
+machine with `mise run publish-local`, which sends the sdist and one wheel:
+
+| Platform | What `pip install segyrs` does |
+|----------|--------------------------------|
+| Linux x86_64, glibc 2.28 or newer | installs the `manylinux_2_28_x86_64` wheel |
+| macOS (Intel or Apple silicon), Windows x64, Linux aarch64, musl Linux | builds segyrs from the sdist |
+
+A build from the sdist needs:
+
+- Rust 1.89 or newer (`rustup.rs`), the `rust-version` of `segyrs-py` (below).
+- A C compiler: the Xcode Command Line Tools on macOS, the Visual Studio C++
+  Build Tools on Windows (the Rust `msvc` toolchain needs them anyway), gcc or
+  clang on Linux. `aws-lc-sys`, linked through `object_store` and `rustls`,
+  compiles C and assembly with the `cc` crate.
+
+It needs no CMake, NASM or libclang: `aws-lc-sys` 0.47 ships pregenerated
+bindings for each of these targets and builds with `cc` when they exist, and
+on Windows x64 the `prebuilt-nasm` feature, which `object_store` enables
+through `aws-lc-rs`, supplies the assembled objects. pip fetches maturin, the
+build backend, by itself. The wheels of the other platforms follow in a later
+version, from the release workflow once Actions run again.
 
 ### Other platforms
 
@@ -106,6 +135,10 @@ mise run test-wheel 3.15   # the same on another pinned Python
 mise run sdist             # the sdist into dist/
 mise run test-sdist        # build the sdist from source in a fresh 3.11 venv; open a path and a file:// URL, export Zarr
 mise run check-dist        # twine check --strict of everything in dist/; uploads nothing
+mise run wheel-linux                                    # manylinux_2_28 x86_64 wheel with its upload tag (zig, no container)
+mise run wheel-linux x86_64-unknown-linux-musl musllinux_1_2
+mise run wheel-linux aarch64-unknown-linux-gnu manylinux_2_28
+mise run test-wheel-file 3.11 dist/segyrs-0.1.0-cp311-abi3-manylinux_2_28_x86_64.whl   # test one wheel, no rebuild
 mise run lint-ci           # actionlint and shellcheck over .github/workflows
 ```
 
@@ -121,6 +154,21 @@ cargo registry out of the panic locations the dependencies compile in, and
 `test-wheel` fails if the extension still holds the home directory or the
 checkout path. The release workflow builds without that mapping, so its wheels
 carry the CI runner's registry paths.
+
+`mise run wheel-linux` builds a wheel with its upload tag on a Linux host
+without a container: maturin's `--zig` support links against glibc 2.28 (or
+musl 1.2) and `--compatibility` sets the tag, with the arguments the release
+workflow passes (`--release --locked`) plus `--interpreter python3.11` and the
+same path mapping as `mise run wheel`. maturin's auditwheel check fails the
+build if the wheel needs a newer glibc symbol or a library outside the policy.
+It differs from the release workflow in one way: the release workflow builds
+in the manylinux_2_28 and musllinux_1_2 containers of `maturin-action`, and
+`wheel-linux` cross-links with zig 0.15.2 (pinned in `mise.toml`) instead.
+`mise run test-wheel-file <python> <wheel>` is `test-wheel` on a given file,
+with no rebuild. A musl or aarch64 wheel cannot run on a glibc x86_64 host
+without a container, so those two build here but are tested only by the
+release workflow (or in a `python:<version>-alpine` or arm64 container, as
+`test-linux` does).
 
 ### Licences in the packages
 
@@ -211,6 +259,29 @@ result of every check with its date and commit, and the owner's steps for
    deployment. Upload starts after that.
 
 PyPI never accepts the same version twice. A failed upload needs a new version.
+
+### Publish from a local build
+
+While Actions do not run, the owner uploads by hand from a Linux x86_64
+checkout, with a PyPI API token instead of Trusted Publishing:
+
+```bash
+rm -rf dist && mise run sdist && mise run wheel-linux
+mise run test-wheel-file 3.11 dist/segyrs-0.1.0-cp311-abi3-manylinux_2_28_x86_64.whl
+mise run test-wheel-file 3.15 dist/segyrs-0.1.0-cp311-abi3-manylinux_2_28_x86_64.whl
+mise run test-sdist
+export UV_PUBLISH_TOKEN=pypi-...   # a PyPI API token; the first upload needs an account-wide one
+mise run publish-local
+```
+
+`publish-local` runs `check-dist` first, refuses to run when
+`UV_PUBLISH_TOKEN` (the variable `uv publish` reads) is unset, and uploads
+exactly the sdist and the `manylinux_2_28_x86_64` wheel in `dist/`, the files
+tested on that machine. It leaves out any musl or aarch64 wheel in `dist/`,
+because those were not run there. `--check-url` makes a rerun skip files that
+PyPI already has. After the first upload, replace the account-wide token with
+one scoped to the `segyrs` project. Trusted Publishing from the release
+workflow stays the route for later versions, once Actions run again.
 
 ## One-time setup (repository owner)
 
