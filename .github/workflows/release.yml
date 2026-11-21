@@ -64,7 +64,7 @@ jobs:
         include:
           - { platform: manylinux-x86_64, runner: ubuntu-latest, target: x86_64-unknown-linux-gnu, manylinux: "2_28" }
           - { platform: manylinux-aarch64, runner: ubuntu-latest, target: aarch64-unknown-linux-gnu, manylinux: "2_28" }
-          - { platform: musllinux-x86_64, runner: ubuntu-latest, target: x86_64-unknown-linux-musl, manylinux: musllinux_1_2 }
+          - { platform: musllinux-x86_64, runner: ubuntu-latest, target: x86_64-unknown-linux-musl, manylinux: musllinux_1_2, extra: --zig }
           - { platform: macos-x86_64, runner: macos-15-intel, target: x86_64-apple-darwin, manylinux: auto }
           - { platform: macos-arm64, runner: macos-15, target: aarch64-apple-darwin, manylinux: auto }
           - { platform: windows-x64, runner: windows-latest, target: x86_64-pc-windows-msvc, manylinux: auto }
@@ -73,9 +73,12 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
-        if: runner.os != 'Linux'
+        if: runner.os != 'Linux' || matrix.extra
         with:
           python-version: "3.13"
+      # The musl wheel is linked by zig on the runner, as `mise run wheel-linux` does: the musl
+      # container's gcc makes the extension need libgcc_s, which auditwheel then copies into the
+      # wheel as a sidecar library (S-43).
       # One abi3 wheel (cp311-abi3). Rust links statically into the extension;
       # maturin's auditwheel check fails the build if a Linux wheel would need a library
       # outside the policy.
@@ -84,7 +87,7 @@ jobs:
           target: ${{ matrix.target }}
           manylinux: ${{ matrix.manylinux }}
           rust-toolchain: ${{ env.RUST_TOOLCHAIN }}
-          args: --release --locked --out dist
+          args: --release --locked --out dist ${{ matrix.extra }}
       - name: One wheel, no sidecar libraries (S-43)
         shell: bash
         run: |

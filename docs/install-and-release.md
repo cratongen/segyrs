@@ -30,9 +30,9 @@ tests. On this machine (Linux x86_64, `mise run wheel`, 2026-11-21) the wheel is
 5.8 MB (5,794,779 bytes, `stat -c %s`).
 
 Each platform gets one wheel. The wheels are `abi3` (`cp311-abi3`), so the same
-file works on every CPython from 3.11 up. The table is the release plan of the
-release workflow; see [What 0.1.0 has on PyPI](#what-010-has-on-pypi) for the
-wheels that exist today.
+file works on every CPython from 3.11 up. The release workflow builds and
+tests the wheels of this table; [What 0.1.0 has on PyPI](#what-010-has-on-pypi)
+says what pip does on each platform.
 
 | Platform | Wheel tag | Minimum OS |
 |----------|-----------|------------|
@@ -57,15 +57,13 @@ if the wheel holds a `.libs` folder or a DLL.
 
 ### What 0.1.0 has on PyPI
 
-GitHub Actions do not run for the `cratongen` organization (a billing block,
-see the [release checklist](release-checklist.md)), so the release workflow
-has never built the six wheels. 0.1.0 is uploaded by hand from a Linux x86_64
-machine with `mise run publish-local`, which sends the sdist and one wheel:
+0.1.0 is published by the release workflow: the sdist and the six wheels of
+the table above.
 
 | Platform | What `pip install segyrs` does |
 |----------|--------------------------------|
-| Linux x86_64, glibc 2.28 or newer | installs the `manylinux_2_28_x86_64` wheel |
-| macOS (Intel or Apple silicon), Windows x64, Linux aarch64, musl Linux | builds segyrs from the sdist |
+| A platform of the table above | installs its wheel |
+| Any other platform | builds segyrs from the sdist |
 
 A build from the sdist needs:
 
@@ -79,8 +77,7 @@ It needs no CMake, NASM or libclang: `aws-lc-sys` 0.47 ships pregenerated
 bindings for each of these targets and builds with `cc` when they exist, and
 on Windows x64 the `prebuilt-nasm` feature, which `object_store` enables
 through `aws-lc-rs`, supplies the assembled objects. pip fetches maturin, the
-build backend, by itself. The wheels of the other platforms follow in a later
-version, from the release workflow once Actions run again.
+build backend, by itself.
 
 ### Other platforms
 
@@ -261,8 +258,9 @@ PyPI never accepts the same version twice. A failed upload needs a new version.
 
 ### Publish from a local build
 
-While Actions do not run, the owner uploads by hand from a Linux x86_64
-checkout, with a PyPI API token instead of Trusted Publishing:
+The release workflow is the route for every release. If Actions cannot run,
+the owner can upload by hand from a Linux x86_64 checkout, with a PyPI API
+token instead of Trusted Publishing:
 
 ```bash
 rm -rf dist && mise run sdist && mise run wheel-linux
@@ -279,8 +277,7 @@ exactly the sdist and the `manylinux_2_28_x86_64` wheel in `dist/`, the files
 tested on that machine. It leaves out any musl or aarch64 wheel in `dist/`,
 because those were not run there. `--check-url` makes a rerun skip files that
 PyPI already has. After the first upload, replace the account-wide token with
-one scoped to the `segyrs` project. Trusted Publishing from the release
-workflow stays the route for later versions, once Actions run again.
+one scoped to the `segyrs` project.
 
 ## One-time setup (repository owner)
 
