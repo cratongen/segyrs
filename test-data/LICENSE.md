@@ -42,7 +42,7 @@ adaptation. Anyone who shares them, or an adaptation of them, must keep this
 attribution and share them under CC BY-SA 3.0 or a compatible licence. The
 segyio changes to them are under LGPL-3.0, as above.
 
-## segyrs fixtures: MIT OR Apache-2.0
+## segyrs fixtures: Apache-2.0
 
 The files in `test-data/segyrs/` are made by segyrs with
 `test-data/segyrs/make_fixtures.py` and are under the segyrs licence, like

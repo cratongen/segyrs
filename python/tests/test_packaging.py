@@ -170,9 +170,9 @@ def test_no_crate_is_published_to_crates_io_yet():
     licence = (REPO / "LICENSE").read_text("utf-8")
     assert "Apache License" in licence and "Version 2.0, January 2004" in licence
     assert "MIT License" not in licence
-    for root in (REPO, *sorted((REPO / "crates").iterdir())):
-        for old in ("LICENSE-MIT", "LICENSE-APACHE"):
-            assert not (root / old).exists(), f"Apache-2.0 only since 2026-11-21: {root / old}"
+    for root in (REPO, *(p for p in sorted((REPO / "crates").iterdir()) if p.is_dir())):
+        extra = sorted(p.name for p in root.glob("LICENSE-*"))
+        assert not extra, extra
 
 
 def _minor(text: str | None) -> tuple[int, int]:

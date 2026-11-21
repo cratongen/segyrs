@@ -133,7 +133,7 @@ Files are created manually.
 ## segyrs fixtures
 
 Files in the `segyrs` directory, made by `segyrs/make_fixtures.py` and
-licensed MIT OR Apache-2.0.
+licensed Apache-2.0.
 
 | File                    | Purpose                                                                                     |
 |-------------------------|---------------------------------------------------------------------------------------------|

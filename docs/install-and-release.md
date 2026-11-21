@@ -172,11 +172,10 @@ release workflow (or in a `python:<version>-alpine` or arm64 container, as
 
 ### Licences in the packages
 
-segyrs is licensed under Apache-2.0 only (`LICENSE`; it was MIT OR
-Apache-2.0 until 2026-11-21). The wheel links its Rust dependencies
-statically, so it also carries their licences: `THIRD-PARTY-LICENSES.txt`
-sits beside `LICENSE` in `license-files`, and lands in the wheel's
-`.dist-info/licenses/` and in the sdist. `THIRD-PARTY-LICENSES.txt` at the
+segyrs is licensed under Apache-2.0 (`LICENSE`). The wheel links its Rust
+dependencies statically, so it also carries their licences:
+`THIRD-PARTY-LICENSES.txt` sits beside `LICENSE` in `license-files`, and lands
+in the wheel's `.dist-info/licenses/` and in the sdist. `THIRD-PARTY-LICENSES.txt` at the
 root is the file of `segyrs`, which includes the object-store and Zarr crates;
 `crates/segyrs-view-py/THIRD-PARTY-LICENSES.txt` is ready for the viewer
 package when it is published. cargo-about writes them from `Cargo.lock`, `about.toml` and `about.hbs`, over the six release

@@ -219,7 +219,7 @@ workflow were not used; `mise run wheel-linux` cross-links with zig instead
   page says so for good (PyPI keeps each version's description). Waiting
   gives all six wheels in one release once billing is fixed.
 - **Licence expression of the wheels.** `pyproject.toml` states
-  `Apache-2.0` (owner decision of 2026-11-21; it was `MIT OR Apache-2.0`). Each wheel also contains statically linked
+  `Apache-2.0` (owner decision of 2026-11-21). Each wheel also contains statically linked
   code under other permissive licences (BSD-2-Clause, BSD-3-Clause, ISC,
   Unicode-3.0, and for the unreleased `segyrs-view` also Zlib, OFL-1.1 and
   Ubuntu-font-1.0), with their texts in `THIRD-PARTY-LICENSES.txt`. PEP 639

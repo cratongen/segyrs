@@ -6,3 +6,6 @@ contact_links:
   - name: Contributing
     url: https://github.com/cratongen/segyrs/blob/main/CONTRIBUTING.md
     about: A code contribution starts with an issue. Read this before you open a pull request.
+  - name: Security
+    url: https://github.com/cratongen/segyrs/security/advisories/new
+    about: Report a vulnerability in private. Do not open a public issue.

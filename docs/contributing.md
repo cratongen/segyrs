@@ -2,9 +2,13 @@
 
 ## Issues first
 
-Issues are open: report a bug, ask about a file that does not open, or propose a change at [GitHub issues](https://github.com/cratongen/segyrs/issues/new/choose). A code contribution starts with an issue. Describe the change there and wait for an answer before you open a pull request; a pull request that links no accepted issue is closed. [CONTRIBUTING.md](https://github.com/cratongen/segyrs/blob/main/CONTRIBUTING.md) has the steps.
+Issues are open to everyone. Report a bug, ask about a SEG-Y file that does not open, or propose a change at [GitHub issues](https://github.com/cratongen/segyrs/issues/new/choose).
+
+A code contribution starts with an issue. Describe the change and why you want it, and wait for a reply before you open a pull request. A pull request that does not link an accepted issue is closed, with a pointer to [CONTRIBUTING.md](https://github.com/cratongen/segyrs/blob/main/CONTRIBUTING.md). The reply tells you whether the change fits, so two people do not build the same thing, and the API stays small.
 
 Never attach or commit a SEG-Y file you may not share. Tests and examples use files made by `segyrs.create` or small public files whose licence allows redistribution.
+
+[CONTRIBUTING.md](https://github.com/cratongen/segyrs/blob/main/CONTRIBUTING.md) also links the [code of conduct](https://github.com/cratongen/segyrs/blob/main/CODE_OF_CONDUCT.md) and the [security policy](https://github.com/cratongen/segyrs/blob/main/SECURITY.md).
 
 ## Commits
 
