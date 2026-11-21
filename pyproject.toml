@@ -9,8 +9,8 @@ readme = "README.md"
 # The floor is pyo3's abi3-py311 (crates/segyrs-py/Cargo.toml) and the oldest
 # Python pinned in mise.toml; the newest classifier is the newest pinned (S-44).
 requires-python = ">=3.11"
-license = "MIT OR Apache-2.0"
-license-files = ["LICENSE-MIT", "LICENSE-APACHE", "THIRD-PARTY-LICENSES.txt"]
+license = "Apache-2.0"
+license-files = ["LICENSE", "THIRD-PARTY-LICENSES.txt"]
 keywords = ["seg-y", "segy", "seismic", "geophysics", "zarr"]
 classifiers = [
   "Development Status :: 3 - Alpha",

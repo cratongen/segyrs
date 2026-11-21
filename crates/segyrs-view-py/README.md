@@ -14,4 +14,4 @@ Then `segyrs.view(volume)` opens a window. The [viewer page](https://cratongen.g
 covers its options. This package has no public Python API of its own, and it is
 experimental: its behaviour can change in any release.
 
-Licence: MIT OR Apache-2.0.
+Licence: Apache-2.0.

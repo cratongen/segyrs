@@ -40,7 +40,7 @@ When the issue is accepted:
 - **No new runtime dependency.** numpy is the only one.
 
 By contributing you agree that your contribution is licensed under
-MIT OR Apache-2.0, the licence of this project, without additional terms.
+Apache-2.0, the licence of this project, without additional terms.
 
 The full contributor guide, with every mise task, is on the docs site:
 [Contributing](https://cratongen.github.io/segyrs/contributing/).

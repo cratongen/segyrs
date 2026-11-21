@@ -239,6 +239,18 @@ Software.
 Apache License 2.0 (Apache-2.0)
 
 Used by:
+  segyrs 0.1.0
+    authors: 
+    source: https://github.com/cratongen/segyrs
+  segyrs-draw 0.1.0
+    authors: 
+    source: https://github.com/cratongen/segyrs
+  segyrs-interop 0.1.0
+    authors: 
+    source: https://github.com/cratongen/segyrs
+  segyrs-py 0.1.0
+    authors: 
+    source: https://github.com/cratongen/segyrs
   aws-lc-sys 0.47.0
     authors: AWS-LC
     source: https://github.com/aws/aws-lc-rs
@@ -3233,18 +3245,6 @@ SOFTWARE.
 MIT License (MIT)
 
 Used by:
-  segyrs 0.1.0
-    authors: 
-    source: https://github.com/cratongen/segyrs
-  segyrs-draw 0.1.0
-    authors: 
-    source: https://github.com/cratongen/segyrs
-  segyrs-interop 0.1.0
-    authors: 
-    source: https://github.com/cratongen/segyrs
-  segyrs-py 0.1.0
-    authors: 
-    source: https://github.com/cratongen/segyrs
   chrono 0.4.45
     authors: 
     source: https://github.com/chronotope/chrono

@@ -110,7 +110,7 @@ layout, so its old result says nothing about this tree.
 |------|-------|
 | Version 0.1.0 in `Cargo.toml` and in the `segyrs==` pin of the unreleased viewer package | `test_segyrs_is_the_only_published_project_and_the_viewer_builds_from_the_repository` |
 | CPython 3.11 and newer, one `cp311-abi3` wheel per platform | `test_s44_python_floor_and_newest_match_the_mise_pins` |
-| Licence `MIT OR Apache-2.0` in `pyproject.toml` and every crate, with `LICENSE-MIT` and `LICENSE-APACHE` in each package | `test_no_crate_is_published_to_crates_io_yet`, `test_segyrs_is_the_only_published_project_and_the_viewer_builds_from_the_repository` |
+| Licence `Apache-2.0` only (owner decision of 2026-11-21) in `pyproject.toml` and every crate, with one `LICENSE` in each package | `test_no_crate_is_published_to_crates_io_yet`, `test_segyrs_is_the_only_published_project_and_the_viewer_builds_from_the_repository` |
 | One project, `segyrs`, with cloud reads and Zarr export built in and no extras; the viewer builds from the repository and is not released | `test_segyrs_is_the_only_published_project_and_the_viewer_builds_from_the_repository`, `test_the_segyrs_wheel_links_cloud_and_zarr_but_no_viewer_stack`, `test_the_segyrs_wheel_alone_reads_urls_writes_zarr_and_says_how_to_build_the_viewer` |
 | Every built platform tested before upload; one sdist and 6 wheels checked by the publish jobs | `test_s45_release_publishes_only_what_it_tests` |
 | Crates stay off crates.io (`publish = false`) | `test_no_crate_is_published_to_crates_io_yet` |
@@ -184,7 +184,7 @@ layout, so its old result says nothing about this tree.
   keeping the history with a note in the README. Neither history is part of
   the PyPI packages.
 - **Licence expression of the wheels.** `pyproject.toml` states
-  `MIT OR Apache-2.0`, as decided. Each wheel also contains statically linked
+  `Apache-2.0` (owner decision of 2026-11-21; it was `MIT OR Apache-2.0`). Each wheel also contains statically linked
   code under other permissive licences (BSD-2-Clause, BSD-3-Clause, ISC,
   Unicode-3.0, and for the unreleased `segyrs-view` also Zlib, OFL-1.1 and
   Ubuntu-font-1.0), with their texts in `THIRD-PARTY-LICENSES.txt`. PEP 639
@@ -269,7 +269,7 @@ Do these in order, by hand. Nothing here was done by the release check.
       macOS 10.15 x86_64, macOS 11.0 arm64, win_amd64), and the pending
       publisher became a normal one.
     - The segyrs project page renders the README with the wordmark and working
-      links, `Requires: Python >=3.11`, licence `MIT OR Apache-2.0`, and the
+      links, `Requires: Python >=3.11`, licence `Apache-2.0`, and the
       Homepage, Documentation, Repository, Issues and Changelog links.
     - In a fresh Python 3.11 venv on another machine, `pip install segyrs`
       installs a wheel (not the sdist), the README quick start runs, and

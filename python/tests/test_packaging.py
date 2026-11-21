@@ -147,8 +147,7 @@ def test_segyrs_is_the_only_published_project_and_the_viewer_builds_from_the_rep
         assert "xperimental" in meta["description"]
         assert ext["tool"]["maturin"]["module-name"] == "_" + dist.replace("-", "_")
         assert meta["license-files"] == project["license-files"]
-        for name in ("LICENSE-MIT", "LICENSE-APACHE"):
-            assert (REPO / "crates" / crate / name).read_bytes() == (REPO / name).read_bytes()
+        assert (REPO / "crates" / crate / "LICENSE").read_bytes() == (REPO / "LICENSE").read_bytes()
         cargo = (REPO / "crates" / crate / "Cargo.toml").read_text("utf-8")
         floor = project["requires-python"].removeprefix(">=").replace(".", "")
         assert f'"abi3-py{floor}"' in cargo
@@ -163,10 +162,17 @@ def test_no_crate_is_published_to_crates_io_yet():
         assert package["repository"] == {"workspace": True}, manifest.parent.name
         assert package["homepage"] == {"workspace": True}, manifest.parent.name
     cargo = tomllib.loads((REPO / "Cargo.toml").read_text(encoding="utf-8"))
-    assert cargo["workspace"]["package"]["license"] == "MIT OR Apache-2.0"
+    assert cargo["workspace"]["package"]["license"] == "Apache-2.0"
     assert cargo["workspace"]["package"]["repository"] == GITHUB
     assert cargo["workspace"]["package"]["homepage"] == SITE
-    assert _pyproject()["project"]["license"] == "MIT OR Apache-2.0"
+    assert _pyproject()["project"]["license"] == "Apache-2.0"
+    assert _pyproject()["project"]["license-files"] == ["LICENSE", "THIRD-PARTY-LICENSES.txt"]
+    licence = (REPO / "LICENSE").read_text("utf-8")
+    assert "Apache License" in licence and "Version 2.0, January 2004" in licence
+    assert "MIT License" not in licence
+    for root in (REPO, *sorted((REPO / "crates").iterdir())):
+        for old in ("LICENSE-MIT", "LICENSE-APACHE"):
+            assert not (root / old).exists(), f"Apache-2.0 only since 2026-11-21: {root / old}"
 
 
 def _minor(text: str | None) -> tuple[int, int]:

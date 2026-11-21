@@ -7,6 +7,9 @@ what changed for someone who uses the Python package.
 
 First public release.
 
+- Licensed under Apache-2.0 only, with one `LICENSE` file. The unreleased
+  tree was MIT OR Apache-2.0 until 2026-11-21.
+
 - Read and write SEG-Y rev 0, 1, 2.0 and 2.1 with a labelled, lazy `Volume`
   (`segyrs.open`, `sel`, `isel`, header columns, geometry report).
 - Write and edit in place (`segyrs.create`, `Volume.to_segy`, `segyrs.edit`,

@@ -4,7 +4,7 @@ site_url: https://cratongen.github.io/segyrs/
 repo_url: https://github.com/cratongen/segyrs
 repo_name: cratongen/segyrs
 edit_uri: ""
-copyright: Copyright 2026 the segyrs authors. MIT OR Apache-2.0.
+copyright: Copyright 2026 the segyrs authors. Apache-2.0.
 
 theme:
   name: material

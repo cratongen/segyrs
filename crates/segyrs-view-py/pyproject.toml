@@ -7,8 +7,8 @@ name = "segyrs-view"
 description = "Experimental native viewer window for segyrs; built from the repository, not yet published"
 readme = "README.md"
 requires-python = ">=3.11"
-license = "MIT OR Apache-2.0"
-license-files = ["LICENSE-MIT", "LICENSE-APACHE", "THIRD-PARTY-LICENSES.txt"]
+license = "Apache-2.0"
+license-files = ["LICENSE", "THIRD-PARTY-LICENSES.txt"]
 classifiers = [
   "Development Status :: 2 - Pre-Alpha",
   "Programming Language :: Python :: 3 :: Only",

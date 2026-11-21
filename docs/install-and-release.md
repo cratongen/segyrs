@@ -124,9 +124,10 @@ carry the CI runner's registry paths.
 
 ### Licences in the packages
 
-The wheel links its Rust dependencies statically, so it carries their
-licences: `THIRD-PARTY-LICENSES.txt` sits beside `LICENSE-MIT` and
-`LICENSE-APACHE` in `license-files`, and lands in the wheel's
+segyrs is licensed under Apache-2.0 only (`LICENSE`; it was MIT OR
+Apache-2.0 until 2026-11-21). The wheel links its Rust dependencies
+statically, so it also carries their licences: `THIRD-PARTY-LICENSES.txt`
+sits beside `LICENSE` in `license-files`, and lands in the wheel's
 `.dist-info/licenses/` and in the sdist. `THIRD-PARTY-LICENSES.txt` at the
 root is the file of `segyrs`, which includes the object-store and Zarr crates;
 `crates/segyrs-view-py/THIRD-PARTY-LICENSES.txt` is ready for the viewer
