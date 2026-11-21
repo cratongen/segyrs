@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <!-- The mark in white on a black square, header block and wiggle thickened for 16 px. -->
+  <rect width="48" height="48" fill="#000"/>
+  <rect x="11" y="4" width="26" height="7" fill="#fff"/>
+  <path d="M21 15C24 17 33 17 33 20.5C33 24 24 24 21 26ZM21 32C24 34.5 36 34.5 36 38C36 41.5 24 41.5 21 44Z" fill="#fff"/>
+  <path d="M21 13V15C24 17 33 17 33 20.5C33 24 24 24 21 26C18 28 13 28 13 29C13 30 18 30 21 32C24 34.5 36 34.5 36 38C36 41.5 24 41.5 21 44V48" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>
+</svg>

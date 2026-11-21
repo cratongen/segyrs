@@ -1,0 +1,9 @@
+target/
+.venv/
+*.so
+__pycache__/
+.cargo-home/
+.uv-cache/
+dist/
+.venv-wheel/
+site/

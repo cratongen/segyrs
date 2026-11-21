@@ -1,0 +1,42 @@
+# Lint and test on every push and pull request, through the same mise tasks a
+# developer runs. The release wheels are built and tested in release.yml.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            .cargo-home/registry
+            .cargo-home/git
+            target
+          key: cargo-${{ runner.os }}-${{ hashFiles('Cargo.lock', 'mise.toml') }}
+          restore-keys: cargo-${{ runner.os }}-
+      # Installs every tool pinned in mise.toml, including each pinned Python.
+      - uses: jdx/mise-action@236a21c3b91f5db6d4e174b348674a0f0caac06d # v5.2.9
+      - run: mise run lint
+      - run: mise run lint-ci
+      - run: mise run build
+      - run: mise run test
+      - run: mise run test-interop
+      - run: mise run check-msrv
+      - run: mise run test-sdist
+      # The release wheel on the oldest and the newest pinned Python (S-44).
+      - run: mise run test-wheel 3.11
+      - run: mise run test-wheel 3.15

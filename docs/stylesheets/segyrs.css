@@ -1,0 +1,192 @@
+/* segyrs docs theme on Material for MkDocs: monotone, flush left, heavy rules.
+   Tokens come from docs/brand/tokens.css. Color stays out of the interface: links are underlined,
+   emphasis is weight, and syntax highlighting is a grey ramp. */
+
+:root {
+  --md-text-font: "Geist";
+  --md-code-font: "Geist Mono";
+}
+
+[data-md-color-scheme="default"] {
+  --sg-bg: var(--sg-white);
+  --sg-surface: var(--sg-grey-100);
+  --sg-fg: var(--sg-black);
+  --sg-muted: var(--sg-grey-600);
+  --sg-hair: var(--sg-grey-200);
+  --sg-rule-color: var(--sg-black);
+  --sg-logo: url("../brand/mark-black.svg");
+}
+
+[data-md-color-scheme="slate"] {
+  --sg-bg: var(--sg-black);
+  --sg-surface: var(--sg-grey-900);
+  --sg-fg: var(--sg-grey-100);
+  --sg-muted: var(--sg-grey-400);
+  --sg-hair: var(--sg-grey-800);
+  --sg-rule-color: var(--sg-grey-100);
+  --sg-logo: url("../brand/mark-white.svg");
+}
+
+[data-md-color-scheme] {
+  --md-default-bg-color: var(--sg-bg);
+  --md-default-fg-color: var(--sg-fg);
+  --md-default-fg-color--light: var(--sg-muted);
+  --md-default-fg-color--lighter: var(--sg-muted);
+  --md-default-fg-color--lightest: var(--sg-hair);
+  --md-default-bg-color--light: color-mix(in srgb, var(--sg-bg) 70%, transparent);
+  --md-default-bg-color--lighter: color-mix(in srgb, var(--sg-bg) 30%, transparent);
+  --md-default-bg-color--lightest: color-mix(in srgb, var(--sg-bg) 12%, transparent);
+  --md-primary-fg-color: var(--sg-bg);
+  --md-primary-fg-color--light: var(--sg-surface);
+  --md-primary-fg-color--dark: var(--sg-bg);
+  --md-primary-bg-color: var(--sg-fg);
+  --md-primary-bg-color--light: var(--sg-muted);
+  --md-accent-fg-color: var(--sg-fg);
+  --md-accent-fg-color--transparent: var(--sg-hair);
+  --md-accent-bg-color: var(--sg-bg);
+  --md-typeset-color: var(--sg-fg);
+  --md-typeset-a-color: var(--sg-fg);
+  --md-typeset-table-color: var(--sg-hair);
+  --md-typeset-table-color--light: var(--sg-surface);
+  --md-typeset-kbd-color: var(--sg-surface);
+  --md-typeset-kbd-accent-color: var(--sg-bg);
+  --md-typeset-kbd-border-color: var(--sg-muted);
+  --md-typeset-mark-color: var(--sg-hair);
+  --md-typeset-del-color: var(--sg-hair);
+  --md-typeset-ins-color: var(--sg-hair);
+  --md-code-bg-color: var(--sg-surface);
+  --md-code-bg-color--light: color-mix(in srgb, var(--sg-surface) 90%, transparent);
+  --md-code-bg-color--lighter: color-mix(in srgb, var(--sg-surface) 54%, transparent);
+  --md-code-fg-color: var(--sg-fg);
+  --md-code-hl-color: var(--sg-hair);
+  --md-code-hl-color--light: var(--sg-hair);
+  --md-code-hl-keyword-color: var(--sg-fg);
+  --md-code-hl-function-color: var(--sg-fg);
+  --md-code-hl-name-color: var(--sg-fg);
+  --md-code-hl-variable-color: var(--sg-fg);
+  --md-code-hl-constant-color: var(--sg-fg);
+  --md-code-hl-number-color: var(--sg-fg);
+  --md-code-hl-string-color: var(--sg-muted);
+  --md-code-hl-special-color: var(--sg-muted);
+  --md-code-hl-operator-color: var(--sg-muted);
+  --md-code-hl-punctuation-color: var(--sg-muted);
+  --md-code-hl-comment-color: var(--sg-muted);
+  --md-code-hl-generic-color: var(--sg-muted);
+  --md-footer-bg-color: var(--sg-bg);
+  --md-footer-bg-color--dark: var(--sg-bg);
+  --md-footer-fg-color: var(--sg-fg);
+  --md-footer-fg-color--light: var(--sg-muted);
+  --md-footer-fg-color--lighter: var(--sg-muted);
+  --md-admonition-bg-color: var(--sg-surface);
+  --md-admonition-fg-color: var(--sg-fg);
+  --md-warning-fg-color: var(--sg-fg);
+  --md-warning-bg-color: var(--sg-surface);
+  --md-shadow-z1: none;
+  --md-shadow-z2: none;
+  --md-shadow-z3: none;
+}
+
+body { background: var(--sg-bg); }
+::selection { background: var(--sg-fg); color: var(--sg-bg); }
+:focus-visible { outline: 2px solid var(--sg-fg); outline-offset: 2px; }
+
+/* Header and tabs: page-colored, closed by a heavy rule like the mark's header block. */
+.md-header, .md-tabs { background-color: var(--sg-bg); color: var(--sg-fg); box-shadow: none; }
+.md-tabs { border-bottom: var(--sg-rule) solid var(--sg-rule-color); }
+.md-header__button.md-logo img { content: var(--sg-logo); height: 1.6rem; }
+.md-header__topic:first-child { font-weight: 800; letter-spacing: -.03em; }
+.md-tabs__link { font-weight: 600; font-size: .7rem; opacity: .7; }
+.md-tabs__item--active .md-tabs__link { opacity: 1; text-decoration: underline var(--sg-rule); text-underline-offset: .5em; }
+.md-search__form, .md-search__input { background-color: var(--sg-surface); border-radius: 0; }
+.md-search__input::placeholder { color: var(--sg-muted); }
+
+.md-grid { max-width: 66rem; }
+.md-nav__item--section > .md-nav__link { font-weight: 800; font-size: .7rem; }
+.md-nav__link--active { font-weight: 700; }
+.md-nav__link:is(:hover, :focus) { color: var(--sg-fg); text-decoration: underline; }
+
+/* Type: Geist for prose, Geist Mono for code and figures. Headings stay upright. */
+.md-typeset { font-size: .8rem; line-height: 1.6; counter-reset: sg-h2; }
+.md-typeset h1 {
+  font-weight: 800;
+  font-size: 2.6em;
+  line-height: 1;
+  letter-spacing: -.04em;
+  color: var(--sg-fg);
+  padding-bottom: .35em;
+  border-bottom: var(--sg-rule-heavy) solid var(--sg-rule-color);
+}
+.md-typeset h2 {
+  counter-increment: sg-h2;
+  font-weight: 800;
+  font-size: 1.5em;
+  line-height: 1.1;
+  letter-spacing: -.025em;
+  margin-top: 2.2em;
+  padding-top: .5em;
+  border-top: var(--sg-rule) solid var(--sg-rule-color);
+}
+.md-typeset h2::before {
+  content: counter(sg-h2, decimal-leading-zero);
+  display: block;
+  margin-bottom: .35em;
+  font-family: var(--sg-font-mono);
+  font-size: .5em;
+  font-weight: 500;
+  letter-spacing: .08em;
+  color: var(--sg-muted);
+}
+.md-typeset h3 { font-weight: 700; font-size: 1.1em; letter-spacing: -.01em; }
+.md-typeset h4 { font-weight: 700; }
+
+.md-typeset a { text-decoration: underline; text-decoration-color: var(--sg-grey-500); text-underline-offset: .2em; }
+.md-typeset a:hover { text-decoration-color: currentColor; }
+.md-typeset a.headerlink { text-decoration: none; }
+
+/* Code: flat blocks with a left rule, no radius. */
+.md-typeset code, .md-typeset pre > code { border-radius: 0; }
+.md-typeset .highlight { border-left: var(--sg-rule) solid var(--sg-rule-color); }
+.md-typeset .highlight .k, .md-typeset .highlight .kn, .md-typeset .highlight .kd, .md-typeset .highlight .nf { font-weight: 700; }
+
+/* Tables: figures in mono, heavy rule under the head. */
+.md-typeset table:not([class]) { border: 0; border-radius: 0; font-size: .72rem; box-shadow: none; }
+.md-typeset table:not([class]) th {
+  background: none;
+  border-bottom: var(--sg-rule) solid var(--sg-rule-color);
+  font-weight: 800;
+}
+.md-typeset table:not([class]) td { border-top: var(--sg-rule-hair) solid var(--sg-hair); font-variant-numeric: tabular-nums; }
+
+/* Admonitions: filled, square, a heavy top rule, monotone icon. The scheme attribute lifts these
+   rules above Material's typed ones (.md-typeset .admonition.note and the like), which carry hues. */
+[data-md-color-scheme] .md-typeset :is(.admonition, details),
+[data-md-color-scheme] .md-typeset :is(.admonition, details):focus-within {
+  background: var(--sg-surface);
+  border: 0;
+  border-top: 4px solid var(--sg-rule-color);
+  border-radius: 0;
+  box-shadow: none;
+  font-size: .74rem;
+}
+[data-md-color-scheme] .md-typeset :is(.admonition, details) > :is(.admonition-title, summary) { background: none; font-weight: 800; }
+[data-md-color-scheme] .md-typeset :is(.admonition, details) > :is(.admonition-title, summary)::before { background-color: var(--sg-fg); }
+[data-md-color-scheme] .md-typeset :is(.admonition, details) > :is(.admonition-title, summary)::after { color: var(--sg-fg); }
+[data-md-color-scheme] .md-typeset details > summary::after { background-color: var(--sg-fg); }
+
+/* Buttons: outlined, square; primary is solid ink. */
+.md-typeset .md-button { border-radius: 0; border: 2px solid var(--sg-fg); color: var(--sg-fg); font-weight: 700; text-decoration: none; }
+.md-typeset .md-button--primary { background: var(--sg-fg); color: var(--sg-bg); }
+.md-typeset .md-button:is(:hover, :focus) { background: var(--sg-fg); border-color: var(--sg-fg); color: var(--sg-bg); }
+.md-typeset .md-button--primary:is(:hover, :focus) { background: var(--sg-grey-600); border-color: var(--sg-grey-600); }
+
+/* Home page hero. The wordmark is the title there, so the generated h1 goes. */
+.md-typeset h1:has(+ .sg-hero) { display: none; }
+.md-typeset .sg-hero { margin: 1rem 0 2.5rem; }
+.md-typeset .sg-hero img { width: min(26rem, 100%); height: auto; }
+.md-typeset .sg-hero p.sg-pitch { font-size: 1.15rem; line-height: 1.4; letter-spacing: -.01em; max-width: 34rem; margin: 1.2rem 0; }
+
+/* Lowercase chrome for the theme's own short labels; prose keeps its case. */
+.md-search__input::placeholder, .md-nav__title, .md-top, .md-footer__direction, .md-source__repository { text-transform: lowercase; }
+
+.md-footer { border-top: var(--sg-rule-hair) solid var(--sg-hair); }
+.md-footer-meta { background: var(--sg-bg); }

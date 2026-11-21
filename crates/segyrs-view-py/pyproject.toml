@@ -1,0 +1,28 @@
+[build-system]
+requires = ["maturin>=1.16,<2"]
+build-backend = "maturin"
+
+[project]
+name = "segyrs-view"
+description = "Experimental native viewer window for segyrs; built from the repository, not yet published"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT OR Apache-2.0"
+license-files = ["LICENSE-MIT", "LICENSE-APACHE", "THIRD-PARTY-LICENSES.txt"]
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Rust",
+]
+dependencies = ["segyrs==0.1.0"]
+dynamic = ["version"]
+
+[project.urls]
+Documentation = "https://cratongen.github.io/segyrs/viewer/"
+Repository = "https://github.com/cratongen/segyrs"
+Issues = "https://github.com/cratongen/segyrs/issues"
+
+[tool.maturin]
+module-name = "_segyrs_view"
+strip = true

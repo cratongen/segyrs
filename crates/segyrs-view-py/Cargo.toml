@@ -1,0 +1,20 @@
+[package]
+name = "segyrs-view-py"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+rust-version = "1.95"
+description = "Experimental native viewer window for the segyrs Python package, built from the repository"
+publish = false
+
+[lib]
+name = "_segyrs_view"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.30", features = ["abi3-py311"] }
+segyrs = { path = "../segyrs" }
+segyrs-draw = { path = "../segyrs-draw" }
+segyrs-view = { path = "../segyrs-view", features = ["window"] }

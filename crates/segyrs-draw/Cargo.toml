@@ -1,0 +1,18 @@
+[package]
+name = "segyrs-draw"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+rust-version.workspace = true
+description = "CPU section renderer for segyrs: plane read, binning, p98 clip, colormaps, axes, PNG"
+publish = false
+
+[dependencies]
+segyrs = { path = "../segyrs" }
+memmap2 = "0.9"
+png = "0.18"
+rayon = "1.10"
+thiserror = "2.0"
+tiny-skia = { version = "0.12", default-features = false, features = ["std", "simd"] }

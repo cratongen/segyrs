@@ -1,0 +1,38 @@
+name: Bug report
+description: segyrs raises, returns a wrong value, or does not open a file it should.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not attach a SEG-Y file you may not share. A small generated file
+        (`segyrs.create`) or the header bytes are usually enough.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: The code you ran and the full error or the wrong output.
+      render: python
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: file
+    attributes:
+      label: The file
+      description: |
+        Revision, sample format, sorting, size, and what `segyrs.validate(path)`
+        returns or raises. Say whether you can share the file.
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: segyrs version, Python version, operating system and CPU.
+      placeholder: segyrs 0.1.0, CPython 3.13, Linux x86_64
+    validations:
+      required: true

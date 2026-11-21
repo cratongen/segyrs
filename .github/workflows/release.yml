@@ -1,0 +1,239 @@
+# Build the sdist and the abi3 wheels of segyrs (object-store reads and Zarr export
+# built in) per platform, test every wheel, then publish to PyPI with Trusted
+# Publishing. The viewer (crates/segyrs-view-py) is not released yet.
+# docs/install-and-release.md has the procedure.
+#
+# S-45: a platform is published only if it is built AND tested here. The
+# `platform` names in `wheels` must equal the union of those in `test-linux`
+# and `test-other`; python/tests/test_interop.py::test_s45_* checks this file.
+# S-44: the Python matrix runs from the requires-python floor to the newest
+# Python pinned in mise.toml; test_s44_* checks that too.
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "Where to upload after the tests pass"
+        type: choice
+        options: [none, testpypi, pypi]
+        default: none
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  RUST_TOOLCHAIN: "1.97.1"
+
+jobs:
+  sdist:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Tag matches the workspace version
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        run: |
+          version=$(sed -n '/^\[workspace.package\]/,/^\[/s/^version = "\(.*\)"/\1/p' Cargo.toml)
+          if [ "${GITHUB_REF_NAME#v}" != "$version" ]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match Cargo.toml version $version"
+            exit 1
+          fi
+      - uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
+        with:
+          command: sdist
+          args: --out dist
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: dist-sdist
+          path: dist/*.tar.gz
+          if-no-files-found: error
+
+  wheels:
+    name: wheel ${{ matrix.platform }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { platform: manylinux-x86_64, runner: ubuntu-latest, target: x86_64-unknown-linux-gnu, manylinux: "2_28" }
+          - { platform: manylinux-aarch64, runner: ubuntu-latest, target: aarch64-unknown-linux-gnu, manylinux: "2_28" }
+          - { platform: musllinux-x86_64, runner: ubuntu-latest, target: x86_64-unknown-linux-musl, manylinux: musllinux_1_2 }
+          - { platform: macos-x86_64, runner: macos-15-intel, target: x86_64-apple-darwin, manylinux: auto }
+          - { platform: macos-arm64, runner: macos-15, target: aarch64-apple-darwin, manylinux: auto }
+          - { platform: windows-x64, runner: windows-latest, target: x86_64-pc-windows-msvc, manylinux: auto }
+    env:
+      MACOSX_DEPLOYMENT_TARGET: ${{ matrix.target == 'aarch64-apple-darwin' && '11.0' || '10.15' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        if: runner.os != 'Linux'
+        with:
+          python-version: "3.13"
+      # One abi3 wheel (cp311-abi3). Rust links statically into the extension;
+      # maturin's auditwheel check fails the build if a Linux wheel would need a library
+      # outside the policy.
+      - uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
+        with:
+          target: ${{ matrix.target }}
+          manylinux: ${{ matrix.manylinux }}
+          rust-toolchain: ${{ env.RUST_TOOLCHAIN }}
+          args: --release --locked --out dist
+      - name: One wheel, no sidecar libraries (S-43)
+        shell: bash
+        run: |
+          ls -l dist
+          whl=(dist/*.whl); [ "${#whl[@]}" -eq 1 ]
+          if [ "$RUNNER_OS" = Windows ]; then py=python; else py=python3; fi
+          for w in dist/*.whl; do "$py" -m zipfile -l "$w"; done | tee contents.txt
+          if grep -E '\.libs/|\.dylibs/|\.dll\b' contents.txt; then
+            echo "::error::a wheel carries a sidecar library"
+            exit 1
+          fi
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: dist-${{ matrix.platform }}
+          path: dist/*.whl
+          if-no-files-found: error
+
+  # Linux wheels run in the official python images: slim (glibc) and alpine
+  # (musl). aarch64 runs under QEMU, so it covers the floor, the default dev
+  # Python and the newest only.
+  test-linux:
+    name: test ${{ matrix.platform }} py${{ matrix.python }}
+    needs: wheels
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [manylinux-x86_64, manylinux-aarch64, musllinux-x86_64]
+        python: ["3.11", "3.12", "3.13", "3.14", "3.15"]
+        exclude:
+          - { platform: manylinux-aarch64, python: "3.12" }
+          - { platform: manylinux-aarch64, python: "3.14" }
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: dist-${{ matrix.platform }}
+          path: dist
+      - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
+        if: matrix.platform == 'manylinux-aarch64'
+        with:
+          platforms: arm64
+      - name: pytest against the installed wheel
+        shell: bash
+        run: |
+          case "${{ matrix.platform }}" in
+            manylinux-x86_64)  arch=linux/amd64 image=python:${{ matrix.python }}-slim ;;
+            manylinux-aarch64) arch=linux/arm64 image=python:${{ matrix.python }}-slim ;;
+            musllinux-x86_64)  arch=linux/amd64 image=python:${{ matrix.python }}-alpine ;;
+          esac
+          docker run --rm --platform "$arch" -v "$PWD:/src" -w /src "$image" sh -ec '
+            python -m pip install -q --only-binary=:all: dist/segyrs-*.whl pytest
+            python -c "import segyrs, sys; print(sys.version, sys.platform, segyrs.__file__)"
+            cd /tmp && python -m pytest -q -p no:cacheprovider --rootdir=/src /src/python/tests
+          '
+
+  # macOS and Windows: a spot check on the floor, the default dev Python and the
+  # newest, each with uv's standalone CPython builds.
+  test-other:
+    name: test ${{ matrix.platform }} py${{ matrix.python }}
+    needs: wheels
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [macos-x86_64, macos-arm64, windows-x64]
+        python: ["3.11", "3.13", "3.15"]
+        include:
+          - { platform: macos-x86_64, runner: macos-15-intel }
+          - { platform: macos-arm64, runner: macos-15 }
+          - { platform: windows-x64, runner: windows-latest }
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: dist-${{ matrix.platform }}
+          path: dist
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+      - name: pytest against the installed wheel
+        shell: bash
+        run: |
+          uv venv --python ${{ matrix.python }} --managed-python "$RUNNER_TEMP/venv"
+          if [ "$RUNNER_OS" = Windows ]; then py="$RUNNER_TEMP/venv/Scripts/python.exe"; else py="$RUNNER_TEMP/venv/bin/python"; fi
+          uv pip install --python "$py" --only-binary=:all: dist/segyrs-*.whl pytest
+          "$py" -c "import segyrs, sys; print(sys.version, sys.platform, segyrs.__file__)"
+          cd "$RUNNER_TEMP"
+          "$py" -m pytest -q -p no:cacheprovider --rootdir="$GITHUB_WORKSPACE" "$GITHUB_WORKSPACE/python/tests"
+
+  # The upload jobs check that dist holds the sdist plus exactly one wheel per
+  # built platform tag (S-45) before anything leaves the runner.
+  publish-pypi:
+    name: publish to PyPI
+    needs: [sdist, wheels, test-linux, test-other]
+    if: >-
+      github.repository == 'cratongen/segyrs' &&
+      startsWith(github.ref, 'refs/tags/v') &&
+      (github.event_name == 'push' || inputs.publish == 'pypi')
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/segyrs
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: dist-*
+          path: dist
+          merge-multiple: true
+      - name: The sdist and the wheel of each of the six platforms
+        shell: bash
+        run: |
+          ls -l dist
+          sdist=(dist/*.tar.gz); [ "${#sdist[@]}" -eq 1 ]
+          whl=(dist/*.whl); [ "${#whl[@]}" -eq 6 ]
+          ls dist/segyrs-*.tar.gz
+          for tag in manylinux_2_28_x86_64 manylinux_2_28_aarch64 musllinux_1_2_x86_64 macosx_10_15_x86_64 macosx_11_0_arm64 win_amd64; do
+            ls dist/segyrs-*-cp311-abi3-*"$tag"*.whl
+          done
+      - uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
+
+  publish-testpypi:
+    name: publish to TestPyPI
+    needs: [sdist, wheels, test-linux, test-other]
+    if: >-
+      github.repository == 'cratongen/segyrs' &&
+      github.event_name == 'workflow_dispatch' && inputs.publish == 'testpypi'
+    runs-on: ubuntu-latest
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/segyrs
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: dist-*
+          path: dist
+          merge-multiple: true
+      - name: The sdist and the wheel of each of the six platforms
+        shell: bash
+        run: |
+          ls -l dist
+          sdist=(dist/*.tar.gz); [ "${#sdist[@]}" -eq 1 ]
+          whl=(dist/*.whl); [ "${#whl[@]}" -eq 6 ]
+          ls dist/segyrs-*.tar.gz
+          for tag in manylinux_2_28_x86_64 manylinux_2_28_aarch64 musllinux_1_2_x86_64 macosx_10_15_x86_64 macosx_11_0_arm64 win_amd64; do
+            ls dist/segyrs-*-cp311-abi3-*"$tag"*.whl
+          done
+      - uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
+        with:
+          repository-url: https://test.pypi.org/legacy/

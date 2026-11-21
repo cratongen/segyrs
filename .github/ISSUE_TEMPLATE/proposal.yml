@@ -1,0 +1,33 @@
+name: Proposal or code contribution
+description: A feature, an API change, or a change you want to make yourself. Code starts here.
+labels: ["proposal"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A code contribution starts with an issue. Describe the change here and
+        wait for an answer before you open a pull request
+        ([CONTRIBUTING.md](https://github.com/cratongen/segyrs/blob/main/CONTRIBUTING.md)).
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What you cannot do today, with a short example.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: The change
+      description: The API or behaviour you propose, and how a test would show it works.
+    validations:
+      required: true
+  - type: dropdown
+    id: who
+    attributes:
+      label: Who writes the code
+      options:
+        - I would like to write it
+        - I am asking the maintainers
+    validations:
+      required: true

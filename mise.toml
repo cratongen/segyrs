@@ -1,0 +1,152 @@
+[tools]
+actionlint = "1.7.12"
+"github:EmbarkStudios/cargo-about" = "0.9.3"
+maturin = "1.16.0"
+python = ["3.13.18", "3.11.18", "3.15.2"]
+ruff = "0.17.5"
+rust = { version = "1.97.1", components = "rustfmt,clippy" }
+shellcheck = "latest"
+uv = { version = "0.12.24", minimum_release_age = "0s", lazy = true }
+
+[tasks.build]
+description = "The segyrs extension and the segyrs-view extension into .venv (uv venv, maturin develop --release)"
+env = { CARGO_HOME = "{{config_root}}/.cargo-home", UV_CACHE_DIR = "{{config_root}}/.uv-cache", UV_PYTHON_DOWNLOADS = "never", VIRTUAL_ENV = "{{config_root}}/.venv" }
+run = [
+  "uv venv --allow-existing --python 3.13 --python-preference only-system .venv",
+  "uv pip install -r pyproject.toml --group dev",
+  "maturin develop --release --uv",
+  "maturin develop --release --uv -m crates/segyrs-view-py/Cargo.toml",
+]
+
+[tasks.test-rs]
+description = "cargo test for the core, draw and viewer crates"
+env = { CARGO_HOME = "{{config_root}}/.cargo-home" }
+run = "cargo test -p segyrs -p segyrs-draw -p segyrs-view"
+
+[tasks.test-py]
+description = "pytest on python/tests against the extensions built by `mise run build` (segyrs and the viewer, which is then required)"
+env = { CARGO_HOME = "{{config_root}}/.cargo-home", UV_CACHE_DIR = "{{config_root}}/.uv-cache", SEGYRS_REQUIRE_EXTRAS = "1" }
+run = "{{config_root}}/.venv/bin/python -m pytest -q python/tests"
+
+[tasks.test]
+description = "Rust tests and Python tests"
+depends = ["test-rs", "test-py"]
+
+[tasks.lint-rs]
+description = "cargo fmt --check and cargo clippy -D warnings over the workspace"
+env = { CARGO_HOME = "{{config_root}}/.cargo-home" }
+run = [
+  "cargo fmt --all --check",
+  "cargo clippy --workspace --all-targets -- -D warnings",
+]
+
+[tasks.lint]
+description = "lint-rs plus ruff check and ruff format --check"
+depends = ["lint-rs"]
+run = ["ruff check python examples", "ruff format --check python examples"]
+
+[tasks.test-ibm-exhaustive]
+description = "IBM encode and decode checks over all 2^32 bit patterns (release)"
+run = "cargo test --release --test write_ledger -- --ignored"
+env = { CARGO_HOME = "{{config_root}}/.cargo-home" }
+
+[tasks.bench-write]
+description = "Write and in-place edit benchmarks; pass a directory on the disk under test"
+run = "cargo run --release --example write_bench -- {{arg(name='dir')}} && cargo run --release --example edit_bench -- {{arg(name='dir')}}"
+env = { CARGO_HOME = "{{config_root}}/.cargo-home" }
+
+[tasks.test-interop]
+description = "cargo test for segyrs-interop with the cloud and zarr features"
+run = "cargo test -p segyrs-interop --all-features"
+env = { CARGO_HOME = "{{config_root}}/.cargo-home" }
+
+[tasks.wheel]
+description = "The release abi3 wheel of segyrs for this platform into dist/ (the build the release workflow runs), with no build-machine paths"
+env = { CARGO_HOME = "{{config_root}}/.cargo-home", CARGO_TARGET_DIR = "{{config_root}}/target/wheel", RUSTFLAGS = "--remap-path-prefix={{config_root}}/.cargo-home=/cargo --remap-path-prefix={{config_root}}=/segyrs --remap-path-prefix={{env.HOME}}=/home" }
+run = [
+  "rm -f dist/segyrs-*.whl dist/segyrs_*.whl",
+  "maturin build --release --locked --out dist --interpreter python3.11",
+]
+
+[tasks.sdist]
+description = "The segyrs sdist into dist/, as the release workflow builds it"
+env = { CARGO_HOME = "{{config_root}}/.cargo-home" }
+run = [
+  "rm -f dist/segyrs-*.tar.gz dist/segyrs_*.tar.gz",
+  "maturin sdist --out dist",
+]
+
+[tasks.test-sdist]
+description = "Build the segyrs sdist from source in a fresh 3.11 venv (no wheel), then open a fixture by path and as a file:// URL and export it to Zarr"
+depends = ["sdist"]
+env = { CARGO_HOME = "{{config_root}}/.cargo-home", CARGO_TARGET_DIR = "{{config_root}}/target/sdist", UV_CACHE_DIR = "{{config_root}}/.uv-cache", UV_PYTHON_DOWNLOADS = "never" }
+run = [
+  "rm -rf .venv-sdist",
+  "uv venv --python 3.11 --python-preference only-system .venv-sdist",
+  "uv pip install --python .venv-sdist/bin/python --no-cache --no-binary segyrs dist/segyrs-*.tar.gz",
+  ".venv-sdist/bin/python -c \"import pathlib, tempfile, segyrs; p = pathlib.Path('test-data/small.sgy').resolve(); v = segyrs.open(p); assert v.shape == (5, 5, 50), v.shape; assert segyrs.open(p.as_uri()).shape == v.shape; s = v.to_zarr(tempfile.mkdtemp() + '/s.zarr'); assert s['chunks_missing'] == 0, s; print(segyrs.__version__, v.shape)\"",
+]
+
+[tasks.check-dist]
+description = "twine check --strict of every wheel and sdist in dist/ (metadata and the README as PyPI renders it); uploads nothing"
+env = { UV_CACHE_DIR = "{{config_root}}/.uv-cache", UV_PYTHON_DOWNLOADS = "never" }
+run = "uv tool run --python 3.13 twine==6.2.0 check --strict dist/*.whl dist/*.tar.gz"
+
+[tasks.test-wheel]
+description = "Install dist/'s segyrs wheel in a fresh venv (default: the 3.11 floor) and run pytest on it alone, as a PyPI user gets it"
+depends = ["wheel"]
+env = { CARGO_HOME = "{{config_root}}/.cargo-home", UV_CACHE_DIR = "{{config_root}}/.uv-cache", UV_PYTHON_DOWNLOADS = "never" }
+run = [
+  "rm -rf .venv-wheel",
+  "uv venv --python {{arg(name='python', default='3.11')}} --python-preference only-system .venv-wheel",
+  "uv pip install --python .venv-wheel/bin/python dist/segyrs-*.whl pytest",
+  ".venv-wheel/bin/python -c \"import segyrs, sys; assert 'site-packages' in segyrs.__file__; print(sys.version.split()[0], segyrs.__file__)\"",
+  "SEGYRS_CHECK_BUILD_PATHS=1 .venv-wheel/bin/python -m pytest -q -p no:cacheprovider python/tests",
+]
+
+[tasks.example]
+description = "Run the worked examples in examples/ (each asserts its results), redraw their figures into docs/examples/img, and fail if they differ from the committed ones"
+run = [
+  "{{config_root}}/.venv/bin/python examples/explore_3d_volume.py --figures docs/examples/img",
+  "{{config_root}}/.venv/bin/python examples/prestack_and_2d.py --figures docs/examples/img",
+  "{{config_root}}/.venv/bin/python examples/write_and_edit.py --figures docs/examples/img",
+  "git diff --exit-code --stat -- docs/examples/img || { echo 'the example figures changed: review and commit docs/examples/img'; exit 1; }",
+]
+
+[tasks.third-party-licenses]
+description = "Regenerate THIRD-PARTY-LICENSES.txt of each wheel (cargo-about, about.toml targets) after a Cargo.lock change"
+env = { CARGO_HOME = "{{config_root}}/.cargo-home" }
+run = [
+  "cargo-about generate --locked -m crates/segyrs-py/Cargo.toml about.hbs -o THIRD-PARTY-LICENSES.txt",
+  "cargo-about generate --locked -m crates/segyrs-view-py/Cargo.toml about.hbs -o crates/segyrs-view-py/THIRD-PARTY-LICENSES.txt",
+]
+
+[tasks.check-msrv]
+description = "cargo check of segyrs and segyrs-draw on the workspace rust-version, then of segyrs-py (which links segyrs-interop with cloud and zarr) on its own rust-version, the oldest Rust the segyrs sdist supports"
+env = { CARGO_HOME = "{{config_root}}/.cargo-home", CARGO_TARGET_DIR = "{{config_root}}/target/msrv" }
+run = [
+  "mise exec rust@1.85.1 -- cargo check --locked -p segyrs -p segyrs-draw",
+  "mise exec rust@1.89.0 -- cargo check --locked -p segyrs-py",
+]
+
+[tasks.lint-ci]
+description = "actionlint (with shellcheck) over .github/workflows"
+run = "actionlint"
+
+[tasks.docs]
+description = "Serve the docs site on http://127.0.0.1:8000 with live reload (mkdocs-material in a throwaway uv env)"
+env = { UV_CACHE_DIR = "{{config_root}}/.uv-cache", UV_PYTHON_DOWNLOADS = "never" }
+run = "uv run --no-project --python 3.13 --with mkdocs-material==9.7.7 mkdocs serve"
+
+[tasks.docs-build]
+description = "Build the docs site into site/ with mkdocs build --strict (what the docs workflow deploys), then check its theme against the built Material CSS"
+env = { UV_CACHE_DIR = "{{config_root}}/.uv-cache", UV_PYTHON_DOWNLOADS = "never", SEGYRS_REQUIRE_SITE = "1" }
+run = [
+  "uv run --no-project --python 3.13 --with mkdocs-material==9.7.7 mkdocs build --strict",
+  "uv run --no-project --python 3.13 --with pytest==9.2.0 --with numpy python -m pytest -q -p no:cacheprovider python/tests/test_docs_theme.py",
+]
+
+[tasks.test-data]
+description = "Release-audit pytest on large local SEG-Y files in $SEGYRS_DATA (default ../segyrs-data); run it under a memory limit"
+env = { UV_CACHE_DIR = "{{config_root}}/.uv-cache", SEGYRS_DATA = "{{config_root}}/../segyrs-data" }
+run = "{{config_root}}/.venv/bin/python -m pytest -q python/tests/test_release_audit_data.py"

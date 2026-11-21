@@ -1,0 +1,29 @@
+[package]
+name = "segyrs-interop"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+rust-version = "1.89"
+description = "Object-store reads and optional Zarr v3 export for segyrs"
+publish = false
+
+[features]
+default = []
+cloud = ["dep:object_store", "dep:tokio", "dep:futures", "dep:bytes", "dep:url", "dep:sysinfo"]
+zarr = ["dep:serde_json"]
+
+[dependencies]
+segyrs = { path = "../segyrs" }
+rayon = "1.10"
+object_store = { version = "0.14.2", optional = true, features = ["aws", "gcp", "azure", "http", "fs"] }
+tokio = { version = "1", optional = true, features = ["rt-multi-thread", "time", "sync"] }
+futures = { version = "0.3", optional = true }
+bytes = { version = "1", optional = true }
+url = { version = "2", optional = true }
+sysinfo = { version = "0.37", optional = true, default-features = false, features = ["system"] }
+serde_json = { version = "1", optional = true }
+
+[dev-dependencies]
+async-trait = "0.1"

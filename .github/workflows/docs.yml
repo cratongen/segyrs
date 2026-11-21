@@ -1,0 +1,52 @@
+name: docs
+
+# Builds the MkDocs site with the same mise task as local work (`mise run docs-build`, strict)
+# and publishes it to GitHub Pages (https://cratongen.github.io/segyrs/) on every push to main,
+# or by hand. The organization's free plan serves Pages from public repositories only, so the
+# deploy job is skipped while the repository is private; see docs/install-and-release.md. The build needs no Rust and no extension: the pages are prose.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "mkdocs.yml"
+      - "mise.toml"
+      - ".github/workflows/docs.yml"
+      - "python/tests/test_docs_theme.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      MISE_YES: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: jdx/mise-action@236a21c3b91f5db6d4e174b348674a0f0caac06d # v5.2.9
+        with:
+          install_args: python uv
+      - run: mise run docs-build
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    if: github.ref == 'refs/heads/main' && !github.event.repository.private
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

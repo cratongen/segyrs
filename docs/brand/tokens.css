@@ -1,0 +1,47 @@
+/* segyrs brand tokens: black, white and seven greys. No hue anywhere.
+   The docs theme (docs/stylesheets/segyrs.css) maps these onto Material for MkDocs.
+   The fonts are served from docs/brand/fonts (SIL OFL 1.1, fonts/OFL.txt), so the theme makes no outside request. */
+@font-face {
+  font-family: "Geist";
+  src: url("fonts/Geist-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Geist Mono";
+  src: url("fonts/GeistMono-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* Palette */
+  --sg-black: #000000;
+  --sg-grey-900: #171717;
+  --sg-grey-800: #262626;
+  --sg-grey-600: #525252;
+  --sg-grey-500: #737373;
+  --sg-grey-400: #a3a3a3;
+  --sg-grey-200: #e5e5e5;
+  --sg-grey-100: #f5f5f5;
+  --sg-white: #ffffff;
+
+  /* Type */
+  --sg-font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --sg-font-mono: "Geist Mono", ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+
+  /* Rules: hairline, rule, heavy rule (the header block of the mark) */
+  --sg-rule-hair: 1px;
+  --sg-rule: 3px;
+  --sg-rule-heavy: 6px;
+
+  /* Spacing on a 4 px step */
+  --sg-space-1: 4px;
+  --sg-space-2: 8px;
+  --sg-space-3: 12px;
+  --sg-space-4: 16px;
+  --sg-space-6: 24px;
+  --sg-space-8: 32px;
+}

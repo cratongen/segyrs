@@ -1,0 +1,21 @@
+[package]
+name = "segyrs-py"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+rust-version = "1.89"
+description = "Python bindings for segyrs: the extension of the segyrs wheel, with object-store reads and Zarr export"
+publish = false
+
+[lib]
+name = "_segyrs"
+crate-type = ["cdylib"]
+
+[dependencies]
+numpy = "0.30"
+pyo3 = { version = "0.30", features = ["abi3-py311"] }
+segyrs = { path = "../segyrs" }
+segyrs-draw = { path = "../segyrs-draw" }
+segyrs-interop = { path = "../segyrs-interop", features = ["cloud", "zarr"] }

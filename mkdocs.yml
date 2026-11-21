@@ -1,0 +1,80 @@
+site_name: segyrs
+site_description: Reading, writing and manipulation of huge SEG-Y files. A Rust core with Python bindings.
+site_url: https://cratongen.github.io/segyrs/
+repo_url: https://github.com/cratongen/segyrs
+repo_name: cratongen/segyrs
+edit_uri: ""
+copyright: Copyright 2026 the segyrs authors. MIT OR Apache-2.0.
+
+theme:
+  name: material
+  logo: brand/mark-black.svg
+  favicon: brand/favicon.svg
+  # Fonts come from docs/brand/tokens.css (Geist and Geist Mono, served from docs/brand/fonts).
+  font: false
+  icon:
+    repo: fontawesome/brands/github
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - content.code.copy
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle: {icon: material/weather-night, name: Dark mode}
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle: {icon: material/weather-sunny, name: Light mode}
+
+extra_css:
+  - brand/tokens.css
+  - stylesheets/segyrs.css
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.details
+  - toc: {permalink: true}
+
+validation:
+  nav:
+    omitted_files: warn
+    not_found: warn
+  links:
+    not_found: warn
+    anchors: warn
+    absolute_links: info
+    unrecognized_links: warn
+
+nav:
+  - Home: index.md
+  - Guide:
+      - User guide: user-guide.md
+      - Writing SEG-Y: writing.md
+      - Manipulation at scale: manipulation.md
+      - Viewer and notebook: viewer.md
+      - Cloud and Zarr: cloud-and-zarr.md
+      - Sample formats: formats.md
+  - Examples:
+      - Exploring a 3D volume: examples/explore-3d-volume.md
+      - Pre-stack gathers and 2D lines: examples/prestack-and-2d.md
+      - Writing and editing SEG-Y: examples/write-and-edit.md
+  - Benchmarks: benchmarks.md
+  - Design: design.md
+  - Project:
+      - Install and release: install-and-release.md
+      - Release checklist: release-checklist.md
+      - Roadmap: roadmap.md
+      - Contributing: contributing.md
+      - Brand: brand.md

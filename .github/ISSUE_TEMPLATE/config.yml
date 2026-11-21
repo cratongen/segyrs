@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://cratongen.github.io/segyrs/
+    about: The user guide, the error list and the design notes.
+  - name: Contributing
+    url: https://github.com/cratongen/segyrs/blob/main/CONTRIBUTING.md
+    about: A code contribution starts with an issue. Read this before you open a pull request.

@@ -1,0 +1,23 @@
+[package]
+name = "segyrs"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+rust-version.workspace = true
+description = "Clean-room SEG-Y reader and writer"
+publish = false
+
+[dependencies]
+libc = "0.2"
+memmap2 = "0.9"
+rayon = "1.10"
+thiserror = "2.0"
+
+[dev-dependencies]
+criterion = "0.5"
+
+[[bench]]
+name = "decode"
+harness = false

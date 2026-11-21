@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="segyrs">
+  <title>segyrs</title>
+  <!-- One SEG-Y trace: a 240-byte header block, then its samples as a variable-area wiggle. -->
+  <rect x="11" y="3" width="26" height="6" fill="#000"/>
+  <path d="M21 14C24 16 32 16 32 19C32 22 24 22 21 24ZM21 31C24 33.5 35 33.5 35 37C35 40.5 24 40.5 21 43Z" fill="#000"/>
+  <path d="M21 11V14C24 16 32 16 32 19C32 22 24 22 21 24C18 26 14 26 14 27.5C14 29 18 29 21 31C24 33.5 35 33.5 35 37C35 40.5 24 40.5 21 43V46" fill="none" stroke="#000" stroke-width="2.5" stroke-linejoin="round"/>
+</svg>

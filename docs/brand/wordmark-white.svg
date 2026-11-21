@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 186 48" role="img" aria-label="segyrs">
+  <title>segyrs</title>
+  <!-- Mark: one SEG-Y trace, header block then a variable-area wiggle. -->
+  <rect x="11" y="3" width="26" height="6" fill="#fff"/>
+  <path d="M21 14C24 16 32 16 32 19C32 22 24 22 21 24ZM21 31C24 33.5 35 33.5 35 37C35 40.5 24 40.5 21 43Z" fill="#fff"/>
+  <path d="M21 11V14C24 16 32 16 32 19C32 22 24 22 21 24C18 26 14 26 14 27.5C14 29 18 29 21 31C24 33.5 35 33.5 35 37C35 40.5 24 40.5 21 43V46" fill="none" stroke="#fff" stroke-width="2.5" stroke-linejoin="round"/>
+  <!-- Letters: monoline strokes on a 20-unit x-height, drawn as paths so no font is needed. -->
+  <g transform="translate(54 4)" fill="none" stroke="#fff" stroke-width="3.5">
+    <path d="M15.06 12.5A7 5 0 1 0 9 20A7 5 0 1 1 2.94 27.5"/>
+    <path d="M24.5 20H40.5A8 10 0 1 0 38.63 26.43"/>
+    <path d="M65 20A8 10 0 1 1 49 20A8 10 0 1 1 65 20M65 10V35A8 5 0 0 1 50.07 37.5"/>
+    <path d="M73.5 10L81.5 30M89.5 10L77.5 40"/>
+    <path d="M98 30V10M98 19C98 13 102 10 108 10"/>
+    <path d="M126.06 12.5A7 5 0 1 0 120 20A7 5 0 1 1 113.94 27.5"/>
+  </g>
+</svg>
