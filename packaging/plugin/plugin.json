@@ -1,0 +1,29 @@
+{
+  "$schema": "https://antigravity.google/schemas/v1/plugin.json",
+  "name": "segyrs",
+  "displayName": "segyrs",
+  "version": "0.1.0",
+  "description": "How to write correct segyrs code: open a SEG-Y file, select before you read, and look up each signature in the installed package.",
+  "author": { "name": "Gustavo Pretto Scholze" },
+  "homepage": "https://cratongen.github.io/segyrs/",
+  "repository": "https://github.com/cratongen/segyrs",
+  "license": "Apache-2.0",
+  "keywords": ["segy", "seismic", "numpy", "python"],
+  "suggestedPrompts": [
+    "Open this SEG-Y file with segyrs and plot one inline",
+    "Crop an inline range to a new SEG-Y file with segyrs",
+    "Write a numpy cube to SEG-Y with segyrs and validate it"
+  ],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "segyrs",
+        "shortDescription": "Correct segyrs SEG-Y calls",
+        "longDescription": "How to write correct segyrs code: open a SEG-Y file, select before you read, and look up each signature in the installed package.",
+        "developerName": "Gustavo Pretto Scholze",
+        "category": "Coding",
+        "websiteURL": "https://cratongen.github.io/segyrs/"
+      }
+    }
+  }
+}

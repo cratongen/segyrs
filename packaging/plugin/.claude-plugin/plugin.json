@@ -1,0 +1,10 @@
+{
+  "name": "segyrs",
+  "version": "0.1.0",
+  "description": "How to write correct segyrs code: open a SEG-Y file, select before you read, and look up each signature in the installed package.",
+  "author": { "name": "Gustavo Pretto Scholze" },
+  "homepage": "https://cratongen.github.io/segyrs/",
+  "repository": "https://github.com/cratongen/segyrs",
+  "license": "Apache-2.0",
+  "keywords": ["segy", "seismic", "numpy", "python"]
+}

@@ -28,6 +28,30 @@ mise install       # the pinned Rust, Python, maturin and uv
 mise run build     # segyrs and the viewer, into .venv
 ```
 
+## Agent plugin
+
+A coding agent that writes segyrs calls from memory gets the names, the argument order and the slow paths wrong. The plugin states the library's rules and tells the agent to read each signature from the installed package, so the code matches your version. One plugin serves Claude, Codex, ChatGPT and Antigravity.
+
+In [Claude Code](https://claude.com/claude-code):
+
+```text
+/plugin marketplace add cratongen/segyrs
+/plugin install segyrs@segyrs
+```
+
+In [Codex](https://developers.openai.com/codex), and from there in the ChatGPT desktop app:
+
+```sh
+codex plugin marketplace add cratongen/segyrs
+codex plugin add segyrs@segyrs
+```
+
+In [Antigravity](https://antigravity.google):
+
+```sh
+agy plugin install https://github.com/cratongen/segyrs/tree/main/packaging/plugin
+```
+
 ## Quick start
 
 No SEG-Y file at hand? This writes a small one, 50 inlines by 60 crosslines of 200 samples:

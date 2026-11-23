@@ -1,0 +1,12 @@
+{
+  "name": "segyrs",
+  "description": "Teaches coding agents the segyrs SEG-Y library.",
+  "owner": { "name": "Gustavo Pretto Scholze" },
+  "plugins": [
+    {
+      "name": "segyrs",
+      "source": "./packaging/plugin",
+      "description": "How to write correct segyrs code: open a SEG-Y file, select before you read, and look up each signature in the installed package."
+    }
+  ]
+}
