@@ -74,7 +74,11 @@ fn fixtures() -> Vec<PathBuf> {
 }
 
 fn rel(path: &Path) -> String {
-    path.strip_prefix(root()).unwrap().display().to_string()
+    path.strip_prefix(root())
+        .unwrap()
+        .display()
+        .to_string()
+        .replace('\\', "/")
 }
 
 /// Open for copying. Format 4 needs a gain convention to open; which one does

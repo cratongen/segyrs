@@ -28,6 +28,7 @@ run = "cargo test -p segyrs -p segyrs-draw -p segyrs-view"
 description = "pytest on python/tests against the extensions built by `mise run build` (segyrs and the viewer, which is then required)"
 env = { CARGO_HOME = "{{config_root}}/.cargo-home", UV_CACHE_DIR = "{{config_root}}/.uv-cache", SEGYRS_REQUIRE_EXTRAS = "1" }
 run = "{{config_root}}/.venv/bin/python -m pytest -q python/tests"
+run_windows = "{{config_root}}/.venv/Scripts/python.exe -m pytest -q python/tests"
 
 [tasks.test]
 description = "Rust tests and Python tests"

@@ -187,6 +187,7 @@ def headless_view(tmp_path, call: str) -> str:
 
 
 @pytest.mark.usefixtures("view_extra")
+@pytest.mark.skipif(not sys.platform.startswith("linux"), reason="display variables are Linux")
 def test_view_without_a_display_raises_cleanly(tmp_path):
     """No display server: SegyrsError naming the notebook image, no window, no crash."""
     out = headless_view(tmp_path, "vol.isel(inline=1)")
@@ -203,6 +204,7 @@ def test_view_checks_the_plane_before_opening(tmp_path):
 
 
 @pytest.mark.usefixtures("view_extra")
+@pytest.mark.skipif(not sys.platform.startswith("linux"), reason="display variables are Linux")
 def test_view_starts_on_a_stepped_window(tmp_path):
     """The selection's window and step pass the checks and reach the window
     stage; the state itself is checked in segyrs-view's smoke tests."""

@@ -9,8 +9,7 @@
 //! - `create_f32_to_ibm`: `segyrs::create` from an in-memory f32 array.
 //! - `edit_header_column`: `Editor::write_header_column` on every trace + `fdatasync`.
 
-use std::io::Write;
-use std::os::unix::fs::FileExt;
+use std::io::{Read, Seek, SeekFrom, Write};
 use std::path::Path;
 use std::time::Instant;
 
@@ -157,10 +156,9 @@ fn main() {
         median(&mut edit)
     );
     let mut probe = [0u8; 4];
-    std::fs::File::open(&edit_path)
-        .unwrap()
-        .read_exact_at(&mut probe, 3600 + 20)
-        .unwrap();
+    let mut probed = std::fs::File::open(&edit_path).unwrap();
+    probed.seek(SeekFrom::Start(3600 + 20)).unwrap();
+    probed.read_exact(&mut probe).unwrap();
     let _ = std::fs::remove_file(&edit_path);
     let _ = std::fs::remove_file(&src_path);
 }

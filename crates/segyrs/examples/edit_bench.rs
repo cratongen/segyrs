@@ -8,16 +8,31 @@
 //! - `mmap_par`: `MAP_SHARED` map, rayon stores, `msync`.
 //! - `rmw_chunks`: read a run of traces, patch in memory, write the run back.
 
+#[cfg(not(unix))]
+fn main() {
+    eprintln!("edit_bench uses posix_fadvise and unix FileExt; it does not run on this platform");
+    std::process::exit(2);
+}
+
+#[cfg(unix)]
 use std::fs::OpenOptions;
+#[cfg(unix)]
 use std::os::fd::AsRawFd;
+#[cfg(unix)]
 use std::os::unix::fs::FileExt;
+#[cfg(unix)]
 use std::path::Path;
+#[cfg(unix)]
 use std::time::Instant;
 
+#[cfg(unix)]
 use rayon::prelude::*;
+#[cfg(unix)]
 use segyrs::write::{create, Editor, HeaderValues, NewFile, SampleData, WriteOptions};
+#[cfg(unix)]
 use segyrs::{HeaderDtype, HeaderField, SampleFormat};
 
+#[cfg(unix)]
 fn evict(path: &Path) {
     let f = std::fs::File::open(path).unwrap();
     f.sync_all().unwrap();
@@ -25,11 +40,13 @@ fn evict(path: &Path) {
     unsafe { libc::posix_fadvise(f.as_raw_fd(), 0, 0, libc::POSIX_FADV_DONTNEED) };
 }
 
+#[cfg(unix)]
 fn median(v: &mut [f64]) -> f64 {
     v.sort_by(|a, b| a.partial_cmp(b).unwrap());
     v[v.len() / 2]
 }
 
+#[cfg(unix)]
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let dir = Path::new(&args[1]);
