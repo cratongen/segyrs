@@ -1,9 +1,12 @@
 target/
 .venv/
 *.so
+*.pyd
 __pycache__/
 .cargo-home/
 .uv-cache/
 dist/
 .venv-wheel/
 site/
+/*.sgy
+/*.png
