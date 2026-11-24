@@ -59,7 +59,7 @@ vol.sel(inline=1020).plot().save("il1020.png")
 | [Benchmarks](benchmarks.md) | Measured timings against segyio, wins and losses, and the correctness checks on irregular files |
 | [Design](design.md) | The rules behind the API, each tied to the upstream issue it answers |
 | [Install and release](install-and-release.md) | Wheels, platforms, CI, the release workflow and this site |
-| [Release checklist](release-checklist.md) | What is ready for 0.1.0, the owner steps, and the minetypes adoption that follows |
+| [Release checklist](release-checklist.md) | What is ready for 0.1.0, the owner steps, and the protocol kinds `seismic_volume` and `prestack_volume` |
 | [Roadmap](roadmap.md) | M1 to M5: goals, features, non-goals, exit criteria |
 | [Contributing](contributing.md) | Issues first, Conventional Commits, the clean-room rule, mise tasks |
 | [Brand](brand.md) | The mark, the palette, the type and how to use them |

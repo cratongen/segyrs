@@ -235,8 +235,9 @@ def test_the_msrv_task_checks_the_workspace_rust_version():
 
 def test_the_release_checklist_names_the_gate_and_real_checks():
     text = (REPO / "docs" / "release-checklist.md").read_text(encoding="utf-8")
-    assert "## minetypes adoption: gate lifted on 2026-11-21" in text
-    assert "| `minetypes.SeismicVolume` |" in text
+    assert "## Protocol kinds: gate lifted on 2026-11-21" in text
+    assert "protocol kinds `seismic_volume` and `prestack_volume`" in text
+    assert "The lazy, file-backed `Volume` stays" in text
     assert "| PyPI project name | `segyrs` |" in text
     assert "segyrs[" not in text and "segyrs-interop-py" not in text
     tests = "".join(p.read_text("utf-8") for p in (REPO / "python" / "tests").glob("test_*.py"))

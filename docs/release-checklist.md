@@ -45,27 +45,11 @@ State on 2026-11-21:
   without a container, so they are untested and not uploaded. They wait for
   the release workflow.
 
-## minetypes adoption: gate lifted on 2026-11-21
+## Protocol kinds: gate lifted on 2026-11-21
 
-The owner lifted the minetypes gate on 2026-11-21: 0.1.0 is published without
-it, and segyrs adopts minetypes, the shared types package of the cratongen
-family (in the sibling folder `../minetypes`), in a later release. minetypes
-is not a dependency of segyrs yet, and no new container type was added.
-Adoption follows minetypes' adoption notes and keeps operations as segyrs
-functions, not methods added to minetypes types.
-
-Public segyrs types that minetypes will replace as the hand-over format:
-
-| segyrs today | minetypes type | Notes |
-|--------------|----------------|-------|
-| A `segyrs.Volume` with dims `(inline, crossline, time)` or `depth`, handed over as `Volume.numpy()` plus `coords` and `attrs` | `minetypes.SeismicVolume` | The lazy, file-backed `Volume` stays: it reads on demand. minetypes replaces the in-memory form that goes to other libraries. |
-| A `segyrs.Volume` with dims `(inline, crossline, offset, time)` | `minetypes.PrestackVolume`, grid layout | Same rule. |
-| A `segyrs.Volume` with dims `(trace, time)` (unsorted, sparse or unstructured files) | `minetypes.PrestackVolume`, traces layout | Same rule. |
-| The `trace_mask` coordinate | the `trace_mask` field of both volume types | Same meaning: dead traces and grid gaps, with integer samples kept. |
-
-`segyrs.Geometry`, `segyrs.Picture`, `segyrs.Editor` and the exception
-classes have no minetypes counterpart and stay. The Rust crates keep their
-own types: minetypes has no SEG-Y concern, so the Rust side needs no change.
+The owner lifted the release gate on 2026-11-21, and segyrs 0.1.0 ships.
+segyrs will produce and consume the protocol kinds `seismic_volume` and `prestack_volume` (local plan issue segyrs L02).
+The lazy, file-backed `Volume` stays: it reads the file on demand.
 
 ## Go/no-go, 2026-11-21
 
@@ -203,8 +187,9 @@ workflow were not used; `mise run wheel-linux` cross-links with zig instead
 
 ## Decisions for the owner
 
-- **The release date of 0.1.0.** The minetypes gate is lifted (2026-11-21);
-  adoption follows in a later release.
+- **The release date of 0.1.0.** The release gate is lifted (2026-11-21).
+  segyrs will produce and consume `seismic_volume` and `prestack_volume`
+  in a later release (local plan issue segyrs L02).
 - **The wheel on every platform.** The segyrs wheel now links `aws-lc-sys`
   (C and assembly, through `object_store` and `rustls`). If it fails in the
   release workflow on a platform, the choices are to fix the build, to drop
