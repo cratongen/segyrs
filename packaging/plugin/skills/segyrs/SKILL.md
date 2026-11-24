@@ -224,8 +224,14 @@ Give the user a time or a speedup only after you ran the code and timed it. Othe
 ## Hand it to a sibling
 
 segyrs is one of a family of standalone libraries for mining and geoscience at https://github.com/cratongen.
-None imports another. They pass NumPy arrays, and tables pass through Arrow, so pandas, polars and pyarrow
-work in between.
+None imports another. They pass protocol objects (`__minetypes__`) and NumPy arrays, and tables pass through
+Arrow, so pandas, polars and pyarrow work in between.
+
+`Volume.__minetypes__(budget=None)` returns a protocol version 1 dict (`seismic_volume` on a 3D
+`(inline, crossline, time)` grid, `prestack_volume` on a 4D `(inline, crossline, offset, time)` grid or a 2D
+`(trace, time)` volume, with `sample_unit="us"`). It decodes the selection into `data` (a copy of size
+`vol.nbytes`) after checking `budget` (`segyrs.BudgetError` before allocating). `segyrs.create(path, obj,
+sample_format=...)` accepts any `seismic_volume` or `prestack_volume` protocol object or dict.
 
 | Library | Import | What it does |
 | --- | --- | --- |

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import gc
 import os
 from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING, Any
@@ -9,6 +10,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from . import _segyrs
+from ._protocol import prepare
 
 if TYPE_CHECKING:
     from ._volume import Volume
@@ -88,12 +90,28 @@ def _cards(text: str | Sequence[str] | None) -> list[str] | None:
     return lines
 
 
+def _stamp_length_unit(path: str, unit: str | None) -> None:
+    """Write ``m`` or ``ft`` into the binary-header measurement system."""
+    code = {"m": 1, "ft": 2}.get(unit or "")
+    if code is None:
+        return
+    file = _segyrs.File(path)
+    endian = file.source_endian
+    raw = bytearray(file.binary_header_bytes())
+    del file
+    gc.collect()
+    order = "little" if endian in ("little", "pairwise") else "big"
+    raw[54:56] = int(code).to_bytes(2, order, signed=True)
+    with edit(path) as editor:
+        editor.write_binary_header(bytes(raw))
+
+
 def create(
     path: str | os.PathLike[str],
-    data: np.ndarray,
+    data: Any,
     *,
     sample_format: str,
-    sample_interval_us: int,
+    sample_interval_us: int | float | None = None,
     inline: Any = None,
     crossline: Any = None,
     offset: Any = None,
@@ -102,23 +120,28 @@ def create(
     endian: str | None = None,
     sync: bool = True,
 ) -> int:
-    """Write a new SEG-Y file from a numpy array in one call.
+    """Write a new SEG-Y file from an array or a protocol volume.
 
     Parameters
     ----------
     path : str or os.PathLike
         Destination. It appears complete or not at all.
-    data : numpy.ndarray
+    data : numpy.ndarray or protocol object
         ``(trace, time)``, ``(inline, crossline, time)`` or
         ``(inline, crossline, offset, time)`` samples of any numeric dtype.
+        A dict, or any object with ``__minetypes__``, of kind
+        ``seismic_volume`` or ``prestack_volume`` is accepted too.
     sample_format : str
         Required, for example ``"ibm_float32"``, ``"ieee_float32"`` or
         ``"int16"``. segyrs does not pick one.
-    sample_interval_us : int
+    sample_interval_us : int, optional
         Sample interval in integer microseconds, written as given.
+        Required for an array. For a protocol object the sample axis
+        supplies it, and a value you pass has to equal that step.
     inline, crossline, offset : array_like, optional
         For 3D and 4D data, the axis labels (default ``1..n``). For 2D
         data, one value per trace. Written at bytes 189, 193 and 37.
+        On a protocol object these come from the object.
     headers : mapping, optional
         More trace-header fields: ``{"cdp_x": values, (byte, dtype):
         values}``, one value per trace or one for all. Float coordinates
@@ -152,6 +175,11 @@ def create(
     SpecError
         An inconsistent request, such as ``sample_interval_us=0`` with
         traces, which :func:`validate` would reject. Nothing is written.
+    SegyrsValueError
+        A protocol object segyrs cannot store, or ``inline``,
+        ``crossline``, ``offset`` or ``headers`` passed with one.
+    TypeError
+        An array written with no ``sample_interval_us``.
 
     Examples
     --------
@@ -161,7 +189,29 @@ def create(
     5136
     >>> segyrs.open("new.sgy").coords["inline"]
     array([10, 11], dtype=int32)
+    >>> payload = segyrs.open("survey.sgy").__minetypes__()
+    >>> segyrs.create("from_protocol.sgy", payload, sample_format="ieee_float32",
+    ...               sample_interval_us=4000) > 0
+    True
+    >>> segyrs.open("from_protocol.sgy").shape
+    (5, 5, 50)
     """
+    prepared = prepare(data, sample_interval_us)
+    length_unit = None
+    if prepared is not None:
+        if inline is not None or crossline is not None or offset is not None or headers is not None:
+            raise _segyrs.SegyrsValueError(
+                "inline, crossline, offset and headers come from the protocol object"
+            )
+        data = prepared.data
+        sample_interval_us = prepared.interval_us
+        inline = prepared.inline
+        crossline = prepared.crossline
+        offset = prepared.offset
+        headers = prepared.headers
+        length_unit = prepared.length_unit
+    elif sample_interval_us is None:
+        raise TypeError("create() missing required keyword-only argument: 'sample_interval_us'")
     data = np.asarray(data)
     if data.ndim not in (2, 3, 4):
         raise ValueError(f"data must be 2D, 3D or 4D, not {data.ndim}D")
@@ -194,7 +244,7 @@ def create(
     merged: dict[Any, Any] = dict(labels)
     merged.update(headers or {})
     samples = np.ascontiguousarray(data.reshape(n, data.shape[-1]))
-    return _segyrs.create(
+    written = _segyrs.create(
         os.fspath(path),
         samples,
         int(sample_interval_us),
@@ -204,6 +254,8 @@ def create(
         text=_cards(text),
         sync=sync,
     )
+    _stamp_length_unit(os.fspath(path), length_unit)
+    return written
 
 
 def _window(vol: Volume) -> tuple[int, int]:

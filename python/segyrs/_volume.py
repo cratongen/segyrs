@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from . import _fast, _interop, _segyrs
+from ._protocol import produce
 from ._segyrs import GeometryError
 
 if TYPE_CHECKING:
@@ -1138,6 +1139,51 @@ class Volume:
         3.22
         """
         return self.numpy().item()
+
+    def __minetypes__(self, *, budget: int | float | None = None) -> dict:
+        """Protocol version 1 for this selection.
+
+        Decodes the selection into ``data``. That array is a copy, and its
+        size is :attr:`nbytes`. ``budget`` is checked before the copy.
+
+        An ``(inline, crossline, time)`` grid is ``seismic_volume``. A grid
+        with ``offset``, or a ``(trace, time)`` volume, is
+        ``prestack_volume``. ``sample_unit`` is ``"us"``. This call does
+        not rescale the sample axis.
+
+        Parameters
+        ----------
+        budget : int or float, optional
+            RAM for the copy. ``None`` is half the available RAM, an int is
+            bytes, a float in (0, 1] is a fraction of the available RAM.
+
+        Returns
+        -------
+        dict
+            Keys defined by protocol version 1 for the kind above.
+
+        Raises
+        ------
+        BudgetError
+            ``nbytes`` does not fit ``budget``. No sample bytes are read.
+        SegyrsValueError
+            The selection has no sample axis, a dropped line axis, a
+            ``point`` axis, or a dtype the protocol does not list.
+
+        Examples
+        --------
+        >>> payload = segyrs.open("survey.sgy").__minetypes__()
+        >>> payload["kind"], payload["data"].shape, payload["sample_unit"]
+        ('seismic_volume', (5, 5, 50), 'us')
+        >>> window = segyrs.open("survey.sgy").sel(inline=slice(1, 2)).__minetypes__()
+        >>> window["data"].shape, window["inlines"].tolist()
+        ((2, 5, 50), [1, 2])
+        >>> segyrs.open("survey.sgy").__minetypes__(budget=10)
+        Traceback (most recent call last):
+        ...
+        segyrs.BudgetError: the selection needs 5000 bytes, the RAM budget is 10 bytes
+        """
+        return produce(self, budget)
 
     # ---- writing (M2) and whole-volume operations (M3): bodies in _write and _ops
 

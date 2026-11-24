@@ -29,7 +29,19 @@ pub(crate) fn register(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(stats, m)?)?;
     m.add_function(wrap_pyfunction!(rms, m)?)?;
     m.add_function(wrap_pyfunction!(clip, m)?)?;
+    m.add_function(wrap_pyfunction!(check_budget, m)?)?;
     Ok(())
+}
+
+/// Raise `BudgetError` when `need` bytes do not fit `budget`. Nothing is allocated.
+///
+/// `budget` is `None` (half the available RAM), an int of bytes, or a float in (0, 1].
+#[pyfunction]
+#[pyo3(signature = (need, budget=None))]
+fn check_budget(need: u64, budget: Option<Bound<'_, PyAny>>) -> PyResult<()> {
+    self::budget(budget.as_ref())?
+        .check(u128::from(need), "the selection")
+        .map_err(to_py)
 }
 
 /// `None`: half the available RAM. An int: that many bytes. A float in (0, 1]:

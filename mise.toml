@@ -34,6 +34,10 @@ run_windows = "{{config_root}}/.venv/Scripts/python.exe -m pytest -q python/test
 description = "Rust tests and Python tests"
 depends = ["test-rs", "test-py"]
 
+[tasks.verify]
+description = "Lint and test"
+depends = ["lint", "test"]
+
 [tasks.lint-rs]
 description = "cargo fmt --check and cargo clippy -D warnings over the workspace"
 env = { CARGO_HOME = "{{config_root}}/.cargo-home" }

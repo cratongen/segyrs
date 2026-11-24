@@ -40,7 +40,7 @@ impl Budget {
     }
 
     /// `Err` naming both numbers when `need` bytes do not fit.
-    pub(crate) fn check(self, need: u128, what: &str) -> Result<()> {
+    pub fn check(self, need: u128, what: &str) -> Result<()> {
         if need > u128::from(self.bytes) {
             return Err(over_budget(need, self.bytes, what));
         }

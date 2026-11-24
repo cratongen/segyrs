@@ -28,7 +28,12 @@ def _public():
         yield name, obj
         if inspect.isclass(obj) and not issubclass(obj, BaseException):
             for attr, value in vars(obj).items():
-                if attr.startswith("_") and attr not in ("__init__", "__enter__", "__exit__"):
+                if attr.startswith("_") and attr not in (
+                    "__init__",
+                    "__enter__",
+                    "__exit__",
+                    "__minetypes__",
+                ):
                     continue
                 if isinstance(value, property) or callable(value):
                     yield f"{name}.{attr}", value
